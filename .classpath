@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="v2"/>
 	<classpathentry kind="src" path="config"/>
-	<classpathentry kind="src" path="manager"/>
+	<classpathentry kind="src" path="deprecated"/>
 	<classpathentry kind="src" path="WebContent/WEB-INF/resources/hibernate"/>
 	<classpathentry kind="src" path="WebContent/WEB-INF/resources/logging"/>
-	<classpathentry kind="src" path="deprecated"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="oracle.eclipse.tools.glassfish.lib.system">

@@ -31,6 +31,8 @@ import com.tscp.mvna.account.device.network.exception.ReserveException;
 import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.device.network.service.OldNetworkService;
+import com.tscp.mvna.account.device.usage.OldUsageDetail;
+import com.tscp.mvna.account.device.usage.OldUsageSUmmary;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvna.payment.method.manager.CreditCardManager;
@@ -45,8 +47,6 @@ import com.tscp.mvne.billing.provisioning.Package;
 import com.tscp.mvne.billing.provisioning.ServiceInstance;
 import com.tscp.mvne.billing.provisioning.service.OldProvisionService;
 import com.tscp.mvne.billing.service.OldBillService;
-import com.tscp.mvne.billing.usage.UsageDetail;
-import com.tscp.mvne.billing.usage.UsageSummary;
 import com.tscp.mvne.config.DEVICE;
 import com.tscp.mvne.config.DOMAIN;
 import com.tscp.mvne.config.NOTIFICATION;
@@ -750,13 +750,13 @@ public class TSCPMVNA {
 	}
 
 	@WebMethod
-	public List<UsageDetail> getCustomerChargeHistory(
+	public List<OldUsageDetail> getCustomerChargeHistory(
 			Customer customer, int accountNo, String mdn) {
 		return customer.getChargeHistory(accountNo, mdn);
 	}
 
 	@WebMethod
-	public List<UsageDetail> getActivity(
+	public List<OldUsageDetail> getActivity(
 			int accountNo, String mdn, Date startDate, Date endDate) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		session.beginTransaction();
@@ -772,7 +772,7 @@ public class TSCPMVNA {
 			q.setParameter("in_start_date", startDate);
 			q.setParameter("in_end_date", endDate);
 		}
-		List<UsageDetail> usageDetailList = q.list();
+		List<OldUsageDetail> usageDetailList = q.list();
 		session.getTransaction().rollback();
 		return usageDetailList;
 	}
@@ -855,10 +855,10 @@ public class TSCPMVNA {
 	}
 
 	@WebMethod
-	public UsageSummary getUsageSummary(
+	public OldUsageSUmmary getUsageSummary(
 			Customer customer, ServiceInstance serviceInstance) {
 		MethodLogger.logMethod("getUsageSummary", serviceInstance);
-		UsageSummary usage = new UsageSummary();
+		OldUsageSUmmary usage = new OldUsageSUmmary();
 		try {
 			List<CustAcctMapDAO> accountList = customer.getCustaccts();
 			boolean validRequest = false;
@@ -1054,10 +1054,10 @@ public class TSCPMVNA {
 			}
 
 			logger.info("Calculating whether to charge MRC");
-			List<UsageDetail> usageDetailList = getCustomerChargeHistory(customer, accountNo, externalId);
+			List<OldUsageDetail> usageDetailList = getCustomerChargeHistory(customer, accountNo, externalId);
 			if (usageDetailList != null && usageDetailList.size() > 0) {
 				logger.info("looking for latest access fee payment");
-				for (UsageDetail usageDetail : usageDetailList) {
+				for (OldUsageDetail usageDetail : usageDetailList) {
 					if (usageDetail.getUsageType().equals("Access Fee")) {
 						logger.info("Found an End Date for MRC of " + usageDetail.getEndTime());
 						lastActiveDate = usageDetail.getEndTime();

@@ -3,10 +3,10 @@
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/config"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/manager"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/WebContent/WEB-INF/resources/hibernate"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/WebContent/WEB-INF/resources/logging"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/deprecated"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/v2"/>
         <property name="context-root" value="TSCPMVNA2"/>
         <property name="java-output-path" value="/TSCPMVNA2/build/classes"/>
     </wb-module>

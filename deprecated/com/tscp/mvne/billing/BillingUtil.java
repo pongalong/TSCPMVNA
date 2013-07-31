@@ -7,12 +7,12 @@ import org.hibernate.Query;
 import org.hibernate.classic.Session;
 import org.joda.time.DateTime;
 
+import com.tscp.mvna.account.device.usage.OldUsageDetail;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
 import com.tscp.mvne.billing.provisioning.ProvisionUtil;
-import com.tscp.mvne.billing.usage.UsageDetail;
 
 public class BillingUtil extends BillingServerUtil {
 
@@ -35,23 +35,23 @@ public class BillingUtil extends BillingServerUtil {
 		return !ProvisionUtil.isCurrentMonth(component);
 	}
 
-	public static List<UsageDetail> getChargeHistory(
+	public static List<OldUsageDetail> getChargeHistory(
 			int accountNo, String externalId) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		session.beginTransaction();
 		Query q = session.getNamedQuery("sp_fetch_charge_history");
 		q.setParameter("in_account_no", accountNo);
 		q.setParameter("in_external_id", externalId);
-		List<UsageDetail> usageDetailList = q.list();
+		List<OldUsageDetail> usageDetailList = q.list();
 		session.getTransaction().rollback();
 		return usageDetailList;
 	}
 
 	public static final Date getLastActiveDate(
 			int accountNo, String externalId) throws BillingException {
-		List<UsageDetail> usageDetailList = getChargeHistory(accountNo, externalId);
+		List<OldUsageDetail> usageDetailList = getChargeHistory(accountNo, externalId);
 		if (usageDetailList != null && !usageDetailList.isEmpty()) {
-			for (UsageDetail usageDetail : usageDetailList) {
+			for (OldUsageDetail usageDetail : usageDetailList) {
 				if (usageDetail.getUsageType().equals("Access Fee")) {
 					return usageDetail.getEndTime();
 				}

@@ -11,10 +11,10 @@ import org.hibernate.classic.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.account.device.usage.OldUsageDetail;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvna.payment.method.manager.CreditCardManager;
 import com.tscp.mvne.billing.Account;
-import com.tscp.mvne.billing.usage.UsageDetail;
 import com.tscp.mvne.customer.dao.CustAcctMapDAO;
 import com.tscp.mvne.customer.dao.CustAddress;
 import com.tscp.mvne.customer.dao.CustInfo;
@@ -125,7 +125,7 @@ public class Customer {
 		session.getTransaction().commit();
 	}
 
-	public List<UsageDetail> getChargeHistory(
+	public List<OldUsageDetail> getChargeHistory(
 			int accountNo, String mdn) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		session.beginTransaction();
@@ -134,13 +134,13 @@ public class Customer {
 		q.setParameter("in_account_no", accountNo);
 		q.setParameter("in_external_id", mdn);
 
-		List<UsageDetail> usageDetailList = q.list();
+		List<OldUsageDetail> usageDetailList = q.list();
 
 		session.getTransaction().rollback();
 		return usageDetailList;
 	}
 
-	public List<UsageDetail> getChargeHistory(
+	public List<OldUsageDetail> getChargeHistory(
 			int accountNo, String mdn, int dayRange) {
 
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -151,7 +151,7 @@ public class Customer {
 		q.setParameter("in_external_id", mdn);
 		q.setParameter("in_day_range", dayRange);
 
-		List<UsageDetail> usageDetailList = q.list();
+		List<OldUsageDetail> usageDetailList = q.list();
 
 		session.getTransaction().rollback();
 		return usageDetailList;

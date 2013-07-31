@@ -1,0 +1,28 @@
+<newCustomer id="5">
+   <accounts accountNo="708326" empty="false">
+      <devices id="1409">
+         <name>Test Device 3</name>
+         <paymentMethod>12398</paymentMethod>
+         <value>99999999999</value>
+      </devices>
+   </accounts>
+   <accounts accountNo="757594" empty="false">
+      <devices id="24111" status="A">
+         <networkInfo>
+            <effectivedate>20130712</effectivedate>
+            <effectivetime>14:01:33.000Z</effectivetime>
+            <esnmeiddec>09608582996</esnmeiddec>
+            <esnmeidhex>6082F754</esnmeidhex>
+            <mdn>2139265265</mdn>
+            <msid>000002138424440</msid>
+            <stale>false</stale>
+            <status>A</status>
+         </networkInfo>
+         <name>jonathan.pong@gmail.com's Device</name>
+         <paymentMethod>12398</paymentMethod>
+         <value>09608582996</value>
+      </devices>
+   </accounts>
+   <creditCards>12398</creditCards>
+   <devices>1409 24111</devices>
+</newCustomer>

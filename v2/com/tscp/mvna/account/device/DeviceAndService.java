@@ -17,7 +17,6 @@ import com.tscp.mvna.account.device.network.exception.DisconnectException;
 import com.tscp.mvna.account.device.network.exception.ReserveException;
 import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
-import com.tscp.mvna.account.device.usage.UsageHistory;
 import com.tscp.mvna.account.exception.AccountRestoreException;
 import com.tscp.mvna.account.exception.AccountSuspendException;
 import com.tscp.mvna.account.kenan.exception.AccountDisconnectException;
@@ -31,7 +30,6 @@ public class DeviceAndService extends Device implements Serializable {
 	protected static final Logger logger = LoggerFactory.getLogger(DeviceAndService.class);
 	private static final long serialVersionUID = -901253807496034420L;
 	private DeviceIntegrity integrity;
-	private UsageHistory usageHistory;
 
 	/* **************************************************
 	 * Status Methods
@@ -161,39 +159,6 @@ public class DeviceAndService extends Device implements Serializable {
 			integrity.sanityCheck(this);
 		}
 		return integrity;
-	}
-
-	@Transient
-	@XmlElement
-	public UsageHistory getUsageHistory() {
-		if (usageHistory == null && !loadedUsageHistory)
-			usageHistory = loadUsageHistory();
-		return usageHistory;
-	}
-
-	public void setUsageHistory(
-			UsageHistory usageHistory) {
-		this.usageHistory = usageHistory;
-	}
-
-	/* **************************************************
-	 * Fetch Methods
-	 */
-
-	protected boolean loadedUsageHistory;
-
-	protected UsageHistory loadUsageHistory() {
-		try {
-			if (usageHistory == null)
-				usageHistory = new UsageHistory(getServiceInstance());
-			if (usageHistory.isStale())
-				usageHistory.refresh();
-			return usageHistory;
-		} catch (Exception e) {
-			return null;
-		} finally {
-			loadedUsageHistory = true;
-		}
 	}
 
 }

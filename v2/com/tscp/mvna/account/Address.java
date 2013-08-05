@@ -1,9 +1,23 @@
 package com.tscp.mvna.account;
 
+import java.io.Serializable;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 import com.telscape.billingserviceinterface.CustAddress;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultCustAddress;
 
-public class Address {
+@XmlRootElement
+@XmlType(propOrder = {
+		"address1",
+		"address2",
+		"address3",
+		"city",
+		"state",
+		"zip" })
+public class Address implements Serializable {
+	private static final long serialVersionUID = 8693917969138968240L;
 	private String address1;
 	private String address2;
 	private String address3;

@@ -25,7 +25,7 @@ public class DeviceHistoryId implements Serializable {
 	}
 
 	@Column(name = "DATE_TIME")
-	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	public DateTime getDateTime() {
 		return dateTime;
 	}

@@ -7,12 +7,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.hibernate.Query;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
-import com.tscp.mvna.payment.method.manager.CreditCardManager;
-import com.tscp.mvne.payment.PaymentException;
 import com.tscp.mvne.payment.OldPaymentInformation;
+import com.tscp.mvne.payment.PaymentException;
 import com.tscp.mvne.payment.PaymentType;
 
 @Deprecated

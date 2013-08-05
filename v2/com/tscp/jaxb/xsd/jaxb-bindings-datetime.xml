@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <globalBindings>
+    <javaType name="org.joda.time.DateTime" xmlType="xs:dateTime" parseMethod="com.tscp.jaxb.xsd.XSDateTimeCustomBinder.parseDateTime" printMethod="com.tscp.jaxb.xsd.XSDateTimeCustomBinder.printDateTime" />
+    <javaType name="org.joda.time.DateTime" xmlType="xs:date" parseMethod="com.tscp.jaxb.xsd.XSDateCustomBinder.parseDate" printMethod="com.tscp.jaxb.xsd.XSDateCustomBinder.printDate" />
+  </globalBindings>
+</bindings>

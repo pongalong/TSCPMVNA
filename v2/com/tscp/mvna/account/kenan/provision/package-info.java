@@ -6,4 +6,4 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 
 import org.joda.time.DateTime;
 
-import com.tscp.xml.adapter.DateTimeAdapter;
+import com.tscp.jaxb.xml.adapter.DateTimeAdapter;

@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.classic.Session;
 
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvne.billing.Account;

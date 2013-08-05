@@ -5,8 +5,13 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
+
+import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 
 //TODO modify this class to use numbers rather than Strings for the returned values. This query is also highly inefficient and needs to be re-thought.
 /**
@@ -16,6 +21,7 @@ import org.joda.time.DateTime;
  * 
  */
 @Entity
+@XmlRootElement
 public class UsageSession implements Serializable {
 	private static final long serialVersionUID = -298371789365302489L;
 	private DateTime dateTime;
@@ -33,6 +39,8 @@ public class UsageSession implements Serializable {
 
 	@Id
 	@Column(name = "DATE_AND_TIME")
+	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@XmlJavaTypeAdapter(DateTimeAdapter.class)
 	public DateTime getDateTime() {
 		return dateTime;
 	}
@@ -93,6 +101,8 @@ public class UsageSession implements Serializable {
 	}
 
 	@Column(name = "START_TIME")
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@XmlJavaTypeAdapter(DateTimeAdapter.class)
 	public DateTime getStartTime() {
 		return startTime;
 	}
@@ -103,6 +113,8 @@ public class UsageSession implements Serializable {
 	}
 
 	@Column(name = "END_TIME")
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@XmlJavaTypeAdapter(DateTimeAdapter.class)
 	public DateTime getEndTime() {
 		return endTime;
 	}

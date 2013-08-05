@@ -142,7 +142,7 @@ public class ServiceInstance {
 	public ServiceInstance(Service service) {
 		if (account == null)
 			account = new KenanAccount();
-		account.setAccountNo(service.getAccountNo());
+		account.setAccountNo(Integer.parseInt(service.getAccountNo()));
 		subscriberNo = Integer.parseInt(service.getSubscrNo());
 		externalId = service.getExternalId();
 		externalIdType = service.getExternalIdType();

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.Query;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class AccountService extends KenanGatewayService {
 		}
 
 		try {
-			account.setAccountNo(response.getValue());
+			account.setAccountNo(Integer.parseInt(response.getValue()));
 		} catch (NumberFormatException e) {
 			throw new AccountCreationException("Account number returned not in number format: " + response.getValue());
 		}

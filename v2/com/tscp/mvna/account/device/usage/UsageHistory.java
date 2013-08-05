@@ -1,28 +1,48 @@
 package com.tscp.mvna.account.device.usage;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.dao.Dao;
 
 @XmlRootElement
-public class UsageHistory {
+public class UsageHistory implements Serializable {
+	private static final long serialVersionUID = 7544343617194343078L;
 	protected static final Logger logger = LoggerFactory.getLogger(UsageHistory.class);
 	private ServiceInstance serviceInstance;
 	private List<UsageSession> usageSessions;
+	private DateTime dateTime = new DateTime();
+	private Period period;
+	private boolean loadedUsageHistory;
 
 	protected UsageHistory() {
 		// do nothing
+	}
+
+	public UsageHistory(List<UsageSession> usageSessions) {
+		this.usageSessions = usageSessions;
+		this.loadedUsageHistory = true;
+
+		if (usageSessions != null && !usageSessions.isEmpty()) {
+			UsageSession firstSession = usageSessions.get(0);
+			KenanAccount account = new KenanAccount();
+			account.setAccountNo(firstSession.getAccountNo());
+
+			serviceInstance = new ServiceInstance();
+			serviceInstance.setAccount(account);
+			serviceInstance.setExternalId(firstSession.getExternalId());
+		}
 	}
 
 	public UsageHistory(ServiceInstance serviceInstance) {
@@ -48,7 +68,7 @@ public class UsageHistory {
 	}
 
 	/* **************************************************
-	 * Fetch Methods
+	 * Helper Methods
 	 */
 
 	@XmlAttribute
@@ -63,26 +83,20 @@ public class UsageHistory {
 		period = null;
 	}
 
-	protected boolean loadedUsageHistory;
-	protected DateTime dateTime = new DateTime();
-	protected Period period;
+	/* **************************************************
+	 * Fetch Methods
+	 */
 
-	@XmlTransient
+	@SuppressWarnings("unchecked")
 	protected List<UsageSession> loadUsageHistory() {
-		// Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-		// session.beginTransaction();
-		// Query q = session.getNamedQuery("sp_fetch_charge_history");
-		// q.setParameter("in_account_no", serviceInstance.getAccount().getAccountNo());
-		// q.setParameter("in_external_id", serviceInstance.getExternalId());
-		// List<OldUsageDetail> usageDetailList = q.list();
-		// session.getTransaction().commit();
-
 		List<UsageSession> result = null;
 
 		try {
 			result = Dao.executeNamedQuery("fetch_usage_history", serviceInstance.getAccount().getAccountNo(), serviceInstance.getExternalId());
 		} catch (Exception e) {
 			logger.error("Error fetching usage history for {}", serviceInstance, e);
+		} finally {
+			loadedUsageHistory = true;
 		}
 
 		return result;

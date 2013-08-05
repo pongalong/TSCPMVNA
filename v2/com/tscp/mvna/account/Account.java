@@ -1,5 +1,6 @@
 package com.tscp.mvna.account;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -38,11 +39,17 @@ import com.tscp.mvne.config.PROVISION;
 @Entity
 @Table(name = "ACCOUNT")
 @XmlRootElement
-public class Account extends KenanAccount {
+public class Account extends KenanAccount implements Serializable {
+	private static final long serialVersionUID = 39652240104589366L;
 	protected static final Logger logger = LoggerFactory.getLogger(Account.class);
 	protected static final String USERNAME = Account.class.getSimpleName();
-	private Customer customer;
-	private List<DeviceAndService> devices;
+	protected Customer customer;
+	protected List<DeviceAndService> devices;
+
+	public Account() {
+		customer = new Customer();
+		contact = new Contact();
+	}
 
 	/* **************************************************
 	 * Status Update Methods

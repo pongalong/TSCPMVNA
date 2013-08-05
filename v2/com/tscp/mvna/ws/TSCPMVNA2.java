@@ -1,5 +1,7 @@
 package com.tscp.mvna.ws;
 
+import java.util.List;
+
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
@@ -13,6 +15,8 @@ import com.tscp.mvna.account.device.network.exception.ConnectException;
 import com.tscp.mvna.account.device.network.exception.DisconnectException;
 import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
+import com.tscp.mvna.account.device.usage.UsageHistory;
+import com.tscp.mvna.account.kenan.UnlinkedAccount;
 import com.tscp.mvna.account.kenan.exception.AccountCreationException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
@@ -86,6 +90,25 @@ public class TSCPMVNA2 {
 		device = getDevice(device.getId());
 		device.restore();
 		return device;
+	}
+
+	@WebMethod
+	public UsageHistory getUsageHistoryByDevice(
+			DeviceAndService device) {
+		device = getDevice(device.getId());
+		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", device.getAccountNo(), device.getServiceInstance().getExternalId()));
+	}
+
+	@WebMethod
+	public UsageHistory getUsageHistoryById(
+			int accountNo, String externalId) {
+		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", accountNo, externalId));
+	}
+
+	@WebMethod
+	public List<UnlinkedAccount> getUnlinkedAccount(
+			int custId) {
+		return Dao.executeNamedQuery("fetch_unlinked_account", custId);
 	}
 
 	/* **************************************************

@@ -1,5 +1,7 @@
 package com.tscp.mvna.account;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -12,7 +14,8 @@ import javax.xml.bind.annotation.XmlType;
 		"email",
 		"phoneNumber",
 		"address" })
-public class Contact {
+public class Contact implements Serializable {
+	private static final long serialVersionUID = -2825303260404211128L;
 	private String firstName;
 	private String middleName;
 	private String lastName;

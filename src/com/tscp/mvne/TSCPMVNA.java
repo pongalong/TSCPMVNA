@@ -15,7 +15,7 @@ import javax.mail.internet.InternetAddress;
 import javax.xml.ws.WebServiceException;
 
 import org.hibernate.Query;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

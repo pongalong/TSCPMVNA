@@ -1,12 +1,13 @@
 package com.tscp.mvna.account.kenan;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +19,17 @@ import com.tscp.mvna.account.kenan.exception.ContactFetchException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 
 @MappedSuperclass
-public class KenanAccount {
+public class KenanAccount implements Serializable {
+	private static final long serialVersionUID = 2929189848838111737L;
 	private static final Logger logger = LoggerFactory.getLogger(KenanAccount.class);
 	protected int accountNo;
 	protected Balance balance;
 	protected Contact contact;
 	protected Service service;
+
+	protected boolean loadedContact;
+	protected boolean loadedBalance;
+	protected boolean loadedService;
 
 	public void refresh() {
 		balance = null;
@@ -47,14 +53,6 @@ public class KenanAccount {
 	public void setAccountNo(
 			int accountNo) {
 		this.accountNo = accountNo;
-	}
-
-	@Transient
-	@XmlTransient
-	public void setAccountNo(
-			String accountNo) throws NumberFormatException {
-		if (accountNo != null && accountNo.matches("\\d+"))
-			this.accountNo = Integer.parseInt(accountNo.trim());
 	}
 
 	@Transient
@@ -103,10 +101,6 @@ public class KenanAccount {
 	/* **************************************************
 	 * Fetch Methods
 	 */
-
-	protected boolean loadedContact;
-	protected boolean loadedBalance;
-	protected boolean loadedService;
 
 	protected Balance loadBalance() {
 		try {

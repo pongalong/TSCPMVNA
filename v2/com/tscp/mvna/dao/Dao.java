@@ -35,7 +35,8 @@ public class Dao {
 
 	protected static Session getSession() {
 		try {
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			// Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			Session session = HibernateUtil.getSessionFactory().openSession();
 			openSessionCount++;
 
 			if (openSessionCount > maxOpenSessionCount)
@@ -155,7 +156,7 @@ public class Dao {
 
 	@SuppressWarnings("rawtypes")
 	public static List executeNamedQuery(
-			String namedQuery, Object... parameters) {
+			String namedQuery, Object... args) {
 
 		Session session = null;
 
@@ -164,16 +165,17 @@ public class Dao {
 			Transaction tx = session.beginTransaction();
 
 			Query query = session.getNamedQuery(namedQuery);
-			String[] paramNames = query.getNamedParameters();
+			String[] parameters = query.getNamedParameters();
 
 			// TODO check number of parameters match
-
-			for (int i = 0; i < parameters.length; i++) {
-				logger.debug("Parameter {} set to {}", paramNames[i], parameters[i]);
-				query.setParameter(paramNames[i], parameters[i]);
+			logger.debug("Executing namedQuery {}", namedQuery);
+			for (int i = 0; i < args.length; i++) {
+				logger.debug("Parameter {} set to {}", parameters[i], args[args.length - i - 1]);
+				query.setParameter(parameters[i], args[args.length - i - 1]);
 			}
 
 			List result = query.list();
+			logger.debug("NamedQuery returning {} results", result.size());
 
 			tx.commit();
 			return result;

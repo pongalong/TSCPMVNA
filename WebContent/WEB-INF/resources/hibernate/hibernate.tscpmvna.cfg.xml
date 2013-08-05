@@ -10,12 +10,19 @@
       name="current_session_context_class">thread</property> <property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property> <property 
       name="show_sql">false</property> -->
 
+    <property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+
     <!-- Direct connection to database -->
     <property name="connection.url">jdbc:oracle:thin:@uscael200:1521:K11MVNOT</property>
     <property name="connection.username">TSCPMVNA</property>
     <property name="connection.password">TSCPMVNA</property>
-    <property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
-    <property name="dialect">org.hibernate.dialect.OracleDialect</property>
+
+
+    <!-- <property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property> <property name="dialect">org.hibernate.dialect.OracleDialect</property> -->
+
+    <property name="connect.driver_class">oracle.jdbc.OracleDriver</property>
+    <property name="dialect">org.hibernate.dialect.Oracle9iDialect</property>
+
     <property name="connection.pool_size">1</property>
     <property name="current_session_context_class">thread</property>
 
@@ -27,11 +34,11 @@
     <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
     <mapping class="com.tscp.mvna.user.customer.Customer" />
     <mapping class="com.tscp.mvna.account.Account" />
+    <mapping class="com.tscp.mvna.account.UnlinkedAccount" />
     <mapping class="com.tscp.mvna.account.device.Device" />
     <mapping class="com.tscp.mvna.account.device.DeviceAndService" />
     <mapping class="com.tscp.mvna.account.device.DeviceHistory" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
-    <mapping class="com.tscp.mvna.account.device.usage.UsageSummary" />
 
     <!-- mappings for stored procedures -->
     <mapping resource="queries.hbm.xml" />

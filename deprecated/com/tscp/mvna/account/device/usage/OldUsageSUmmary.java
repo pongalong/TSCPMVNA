@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.Query;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 
 import com.telscape.billingserviceinterface.BillingUsage;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;

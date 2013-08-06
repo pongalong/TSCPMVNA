@@ -122,7 +122,7 @@ public class AccountService extends KenanGatewayService {
 
 	public static Contact getContact(
 			int accountNo) throws ContactFetchException {
-		Contact contact = new Contact();
+		Contact contact = new Contact(accountNo);
 		BillName billName = getName(accountNo);
 		if (billName != null) {
 			contact.setFirstName(billName.getFirstName());

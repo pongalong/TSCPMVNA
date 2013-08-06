@@ -19,10 +19,9 @@ import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.exception.AccountRestoreException;
 import com.tscp.mvna.account.exception.AccountSuspendException;
+import com.tscp.mvna.account.kenan.Service;
 import com.tscp.mvna.account.kenan.exception.AccountDisconnectException;
-import com.tscp.mvna.account.kenan.provision.ServiceComponent;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
-import com.tscp.mvna.account.kenan.provision.ServicePackage;
 
 @Entity
 @Table(name = "DEVICE")
@@ -130,26 +129,8 @@ public class DeviceAndService extends Device implements Serializable {
 	}
 
 	/* **************************************************
-	 * Getters and Setters
+	 * Integrity Methods
 	 */
-
-	@Transient
-	@XmlElement
-	public ServiceInstance getServiceInstance() {
-		return getAccount().getService().getActiveServiceInstance();
-	}
-
-	@Transient
-	@XmlElement
-	public ServicePackage getServicePackage() {
-		return getAccount().getService().getActiveServicePackage();
-	}
-
-	@Transient
-	@XmlElement
-	public ServiceComponent getServiceComponent() {
-		return getAccount().getService().getActiveServiceComponent();
-	}
 
 	@Transient
 	@XmlElement
@@ -159,6 +140,16 @@ public class DeviceAndService extends Device implements Serializable {
 			integrity.sanityCheck(this);
 		}
 		return integrity;
+	}
+
+	/* **************************************************
+	 * Getters and Setters
+	 */
+
+	@Transient
+	@XmlElement
+	public Service getService() {
+		return getAccount().getService();
 	}
 
 }

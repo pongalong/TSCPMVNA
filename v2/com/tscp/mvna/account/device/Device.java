@@ -13,6 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -50,6 +51,7 @@ public abstract class Device extends NetworkDevice {
 	protected Account account;
 	protected CreditCard paymentMethod;
 	protected List<DeviceHistory> history;
+	protected Topup topup;
 
 	/* **************************************************
 	 * Network Methods
@@ -270,6 +272,16 @@ public abstract class Device extends NetworkDevice {
 		if (getPaymentMethod() != null)
 			return paymentMethod.getId();
 		return 0;
+	}
+
+	@OneToOne(fetch = FetchType.EAGER, mappedBy = "device")
+	public Topup getTopup() {
+		return topup;
+	}
+
+	public void setTopup(
+			Topup topup) {
+		this.topup = topup;
 	}
 
 	/* **************************************************

@@ -47,7 +47,7 @@ public class ServicePackage {
 		this.id = id;
 	}
 
-	@XmlTransient
+	@XmlAttribute
 	public int getInstanceId() {
 		return instanceId;
 	}
@@ -57,7 +57,7 @@ public class ServicePackage {
 		this.instanceId = instanceId;
 	}
 
-	@XmlAttribute
+	@XmlTransient
 	public int getAccountNo() {
 		return accountNo;
 	}

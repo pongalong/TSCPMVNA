@@ -1,7 +1,5 @@
 package com.tscp.mvna.account.kenan;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -14,29 +12,28 @@ import org.slf4j.LoggerFactory;
 
 import com.tscp.mvna.account.Balance;
 import com.tscp.mvna.account.Contact;
-import com.tscp.mvna.account.kenan.exception.BalanceFetchException;
-import com.tscp.mvna.account.kenan.exception.ContactFetchException;
-import com.tscp.mvna.account.kenan.service.AccountService;
 
 @MappedSuperclass
-public class KenanAccount implements Serializable {
-	private static final long serialVersionUID = 2929189848838111737L;
-	private static final Logger logger = LoggerFactory.getLogger(KenanAccount.class);
+public class KenanAccount implements KenanObject {
+	protected static final Logger logger = LoggerFactory.getLogger(KenanAccount.class);
 	protected int accountNo;
 	protected Balance balance;
 	protected Contact contact;
 	protected Service service;
 
-	protected boolean loadedContact;
-	protected boolean loadedBalance;
-	protected boolean loadedService;
+	@Override
+	@Transient
+	public boolean isLoaded() {
+		boolean nullCheck = contact != null && balance != null;
+		boolean loadedCheck = contact.isLoaded() && balance.isLoaded() && service.isLoaded();
+		return nullCheck && loadedCheck;
+	}
 
+	@Override
 	public void refresh() {
 		balance = null;
 		contact = null;
 		service = null;
-		loadedContact = false;
-		loadedBalance = false;
 	}
 
 	/* **************************************************
@@ -58,8 +55,12 @@ public class KenanAccount implements Serializable {
 	@Transient
 	@XmlElement
 	public Balance getBalance() {
-		if (balance == null || balance.isStale())
-			balance = loadBalance();
+		if (balance == null)
+			balance = new Balance(accountNo);
+		if (!balance.isLoaded())
+			balance.refresh();
+		else if (balance.isLoaded() && balance.isStale())
+			balance.refresh();
 		return balance;
 	}
 
@@ -71,8 +72,10 @@ public class KenanAccount implements Serializable {
 	@Transient
 	@XmlElement
 	public Contact getContact() {
-		if (contact == null && !loadedContact)
-			loadContact();
+		if (contact == null)
+			contact = new Contact(accountNo);
+		if (!contact.isLoaded())
+			contact.refresh();
 		return contact;
 	}
 
@@ -84,47 +87,16 @@ public class KenanAccount implements Serializable {
 	@Transient
 	@XmlElement
 	public Service getService() {
-		if (service == null && !loadedService) {
-			service = new Service();
-			service.setAccount(this);
+		if (service == null)
+			service = new Service(this);
+		if (!service.isLoaded())
 			service.refresh();
-			loadedService = true;
-		}
 		return service;
 	}
 
 	public void setService(
 			Service service) {
 		this.service = service;
-	}
-
-	/* **************************************************
-	 * Fetch Methods
-	 */
-
-	protected Balance loadBalance() {
-		try {
-			return AccountService.getBalance(accountNo);
-		} catch (BalanceFetchException e) {
-			logger.error("Unable to fetch Balance for {}", this);
-			return null;
-		} finally {
-			loadedBalance = true;
-		}
-	}
-
-	protected Contact loadContact() {
-		try {
-			contact = AccountService.getContact(accountNo);
-			if (contact != null)
-				contact.setAddress(AccountService.getAddress(accountNo));
-			return contact;
-		} catch (ContactFetchException e) {
-			logger.error("Unable to fetch Contact for {}", this);
-			return null;
-		} finally {
-			loadedContact = true;
-		}
 	}
 
 }

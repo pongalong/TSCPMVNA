@@ -29,10 +29,11 @@ public abstract class NetworkGateway {
 	 * @return
 	 */
 	protected static final API3Service loadService() throws InitializationException {
+		gatewaySessionCount++;
 		CONFIG.initAll();
 		try {
 			API3Service service = new API3Service(new URL(CONNECTION.networkWSDL), new QName(CONNECTION.networkNameSpace, CONNECTION.networkServiceName));
-			logger.info("NetworkGateway initialized to {}", service.getWSDLDocumentLocation());
+			logger.info("NetworkGateway initialized to {} invoked {} times", service.getWSDLDocumentLocation(), gatewaySessionCount);
 			return service;
 		} catch (MalformedURLException url_ex) {
 			logger.error("Exception initializing NetworkGateway at " + CONNECTION.networkWSDL, url_ex);

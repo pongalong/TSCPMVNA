@@ -48,7 +48,7 @@ public class ServiceComponent {
 		this.id = id;
 	}
 
-	@XmlTransient
+	@XmlAttribute
 	public int getInstanceId() {
 		return instanceId;
 	}
@@ -58,6 +58,7 @@ public class ServiceComponent {
 		this.instanceId = instanceId;
 	}
 
+	@XmlTransient
 	public ServicePackage getServicePackage() {
 		return servicePackage;
 	}

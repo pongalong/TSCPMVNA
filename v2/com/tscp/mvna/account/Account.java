@@ -41,15 +41,12 @@ import com.tscp.mvne.config.PROVISION;
 @XmlRootElement
 public class Account extends KenanAccount implements Serializable {
 	private static final long serialVersionUID = 39652240104589366L;
+
 	protected static final Logger logger = LoggerFactory.getLogger(Account.class);
 	protected static final String USERNAME = Account.class.getSimpleName();
+
 	protected Customer customer;
 	protected List<DeviceAndService> devices;
-
-	public Account() {
-		customer = new Customer();
-		contact = new Contact();
-	}
 
 	/* **************************************************
 	 * Status Update Methods

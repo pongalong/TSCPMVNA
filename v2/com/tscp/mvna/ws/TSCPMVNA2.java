@@ -10,15 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import com.oracle.webservices.api.databinding.DatabindingMode;
 import com.tscp.mvna.account.Account;
+import com.tscp.mvna.account.UnlinkedAccount;
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.account.device.network.exception.ConnectException;
 import com.tscp.mvna.account.device.network.exception.DisconnectException;
 import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.device.usage.UsageHistory;
-import com.tscp.mvna.account.kenan.UnlinkedAccount;
 import com.tscp.mvna.account.kenan.exception.AccountCreationException;
 import com.tscp.mvna.account.kenan.service.AccountService;
+import com.tscp.mvna.account.payment.PaymentRequest;
 import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.customer.Customer;
@@ -29,7 +30,7 @@ public class TSCPMVNA2 {
 	protected static final Logger logger = LoggerFactory.getLogger(TSCPMVNA2.class);
 
 	/* **************************************************
-	 * Fetch Methods
+	 * Fetch Object Methods
 	 */
 
 	@WebMethod
@@ -54,6 +55,29 @@ public class TSCPMVNA2 {
 	public Account getAccount(
 			int accountNo) {
 		return (Account) Dao.get(Account.class, accountNo);
+	}
+
+	/* **************************************************
+	 * Fetch Usage Methods
+	 */
+
+	@WebMethod
+	public UsageHistory getUsageHistoryByDevice(
+			DeviceAndService device) {
+		// device = getDevice(device.getId());
+		return getUsageHistoryById(device.getAccountNo(), device.getService().getActiveServiceInstance().getExternalId());
+	}
+
+	@WebMethod
+	public UsageHistory getUsageHistoryById(
+			int accountNo, String externalId) {
+		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", accountNo, externalId));
+	}
+
+	@WebMethod
+	public List<UnlinkedAccount> getUnlinkedAccounts(
+			int custId) {
+		return Dao.executeNamedQuery("fetch_unlinked_account", custId);
 	}
 
 	/* **************************************************
@@ -92,25 +116,6 @@ public class TSCPMVNA2 {
 		return device;
 	}
 
-	@WebMethod
-	public UsageHistory getUsageHistoryByDevice(
-			DeviceAndService device) {
-		device = getDevice(device.getId());
-		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", device.getAccountNo(), device.getServiceInstance().getExternalId()));
-	}
-
-	@WebMethod
-	public UsageHistory getUsageHistoryById(
-			int accountNo, String externalId) {
-		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", accountNo, externalId));
-	}
-
-	@WebMethod
-	public List<UnlinkedAccount> getUnlinkedAccount(
-			int custId) {
-		return Dao.executeNamedQuery("fetch_unlinked_account", custId);
-	}
-
 	/* **************************************************
 	 * Account Methods
 	 */
@@ -125,6 +130,46 @@ public class TSCPMVNA2 {
 	public void updateEmail(
 			int accountNo, String newEmail) {
 		AccountService.updateEmail(accountNo, newEmail);
+	}
+
+	@WebMethod
+	public PaymentRequest makeTopup(
+			DeviceAndService device, String sessionId) {
+
+		device = getDevice(device.getId());
+
+		PaymentRequest paymentRequest = new PaymentRequest();
+		paymentRequest.setAccount(device.getAccount());
+		paymentRequest.setCreditCard(device.getPaymentMethod());
+		paymentRequest.setSessionId(sessionId);
+		paymentRequest.setAmount(device.getTopup().getAmount());
+
+		logger.debug("{}", device.getAccount());
+		logger.debug("{}", device.getPaymentMethod());
+
+		Dao.saveOrUpdate(paymentRequest);
+
+		return paymentRequest;
+	}
+
+	@WebMethod
+	public PaymentRequest makePayment(
+			DeviceAndService device, Double amount, String sessionId) {
+
+		device = getDevice(device.getId());
+
+		PaymentRequest paymentRequest = new PaymentRequest();
+		paymentRequest.setAccount(device.getAccount());
+		paymentRequest.setCreditCard(device.getPaymentMethod());
+		paymentRequest.setSessionId(sessionId);
+		paymentRequest.setAmount(amount);
+
+		logger.debug("{}", device.getAccount());
+		logger.debug("{}", device.getPaymentMethod());
+
+		Dao.saveOrUpdate(paymentRequest);
+
+		return paymentRequest;
 	}
 
 }

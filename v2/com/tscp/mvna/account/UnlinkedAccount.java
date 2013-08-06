@@ -5,11 +5,17 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
+import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
+
 @Entity
+@XmlRootElement
 public class UnlinkedAccount implements Serializable {
 	private static final long serialVersionUID = 8546335168318675912L;
 	private int accountNo;
@@ -20,6 +26,7 @@ public class UnlinkedAccount implements Serializable {
 
 	@Id
 	@Column(name = "account_no")
+	@XmlAttribute
 	public int getAccountNo() {
 		return accountNo;
 	}
@@ -30,6 +37,7 @@ public class UnlinkedAccount implements Serializable {
 	}
 
 	@Column(name = "cust_id")
+	@XmlAttribute
 	public int getCustId() {
 		return custId;
 	}
@@ -60,7 +68,8 @@ public class UnlinkedAccount implements Serializable {
 	}
 
 	@Column(name = "pmt_trans_date")
-	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@XmlJavaTypeAdapter(DateTimeAdapter.class)
 	public DateTime getPaymentTransDate() {
 		return paymentTransDate;
 	}
@@ -68,6 +77,11 @@ public class UnlinkedAccount implements Serializable {
 	public void setPaymentTransDate(
 			DateTime paymentTransDate) {
 		this.paymentTransDate = paymentTransDate;
+	}
+
+	@Override
+	public String toString() {
+		return "UnlinkedAccount [accountNo=" + accountNo + ", custId=" + custId + ", email=" + email + ", paymentTransId=" + paymentTransId + ", paymentTransDate=" + paymentTransDate + "]";
 	}
 
 }

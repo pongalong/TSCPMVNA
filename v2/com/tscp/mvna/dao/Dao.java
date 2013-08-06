@@ -35,7 +35,6 @@ public class Dao {
 
 	protected static Session getSession() {
 		try {
-			// Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			Session session = HibernateUtil.getSessionFactory().openSession();
 			openSessionCount++;
 
@@ -175,7 +174,6 @@ public class Dao {
 			}
 
 			List result = query.list();
-			logger.debug("NamedQuery returning {} results", result.size());
 
 			tx.commit();
 			return result;

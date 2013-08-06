@@ -106,6 +106,13 @@ public class TSCPMVNA {
 	// MethodLogger.logMethodExit("refundPayment");
 	// }
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#refundPayment(int, int, java.lang.String, int, java.lang.String, int,
+	 * java.lang.String)
+	 */
+
 	@WebMethod
 	public void refundPayment(
 			int accountNo, int transId, String amount, int trackingId, String refundBy, int refundCode, String notes) throws RefundException {
@@ -113,6 +120,12 @@ public class TSCPMVNA {
 		refundService.refundPayment(accountNo, transId, trackingId, amount, refundBy, refundCode, notes);
 		MethodLogger.logMethodExit("refundPayment");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getPaymentTransaction(int, int)
+	 */
 
 	@WebMethod
 	public PaymentTransaction getPaymentTransaction(
@@ -126,6 +139,13 @@ public class TSCPMVNA {
 	public TSCPMVNA() {
 		init();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#activateService(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvna.account.device.network.OldNetworkInfo)
+	 */
 
 	@WebMethod
 	public OldNetworkInfo activateService(
@@ -156,6 +176,13 @@ public class TSCPMVNA {
 		return networkInfo;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#addCreditCard(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.payment.dao.OldCreditCard)
+	 */
+
 	@WebMethod
 	public OldCreditCard addCreditCard(
 			Customer customer, OldCreditCard creditCard) {
@@ -173,6 +200,13 @@ public class TSCPMVNA {
 		return insertedCreditCard;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#addCustAddress(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.customer.dao.CustAddress)
+	 */
+
 	@WebMethod
 	public List<CustAddress> addCustAddress(
 			Customer customer, CustAddress custAddress) {
@@ -188,6 +222,13 @@ public class TSCPMVNA {
 		custAddress.save();
 		return customer.getCustAddressList(custAddress.getAddressId());
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#addDeviceInfoObject(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.device.OldDevice)
+	 */
 
 	@WebMethod
 	public OldDevice addDeviceInfoObject(
@@ -214,6 +255,12 @@ public class TSCPMVNA {
 		return device;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#applyChargeCredit(com.tscp.mvne.payment.dao.OldCreditCard, java.lang.String)
+	 */
+
 	@WebMethod
 	public void applyChargeCredit(
 			OldCreditCard creditCard, String amount) {
@@ -221,6 +268,12 @@ public class TSCPMVNA {
 		refundService.applyChargeCredit(creditCard, amount);
 		MethodLogger.logMethodExit("applyChargeCredit");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#applyContract(com.tscp.mvne.billing.contract.KenanContract)
+	 */
 
 	@WebMethod
 	public int applyContract(
@@ -231,6 +284,13 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("applyContract");
 		return contractId;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#applyCouponPayment(com.tscp.mvne.billing.Account, java.lang.String,
+	 * java.util.Date)
+	 */
 
 	@WebMethod
 	public int applyCouponPayment(
@@ -254,6 +314,13 @@ public class TSCPMVNA {
 			throw new WebServiceException("Active ExternalIDs not found for Account Number " + account.getAccountNo());
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#createBillingAccount(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.billing.Account)
+	 */
 
 	@WebMethod
 	public Account createBillingAccount(
@@ -326,6 +393,13 @@ public class TSCPMVNA {
 		}
 		MethodLogger.logMethodExit("createReinstallServiceInstance");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#createServiceInstance(com.tscp.mvne.billing.Account,
+	 * com.tscp.mvne.billing.provisioning.ServiceInstance)
+	 */
 
 	@WebMethod
 	public Account createServiceInstance(
@@ -439,6 +513,13 @@ public class TSCPMVNA {
 	// return customer.getCustpmttypes(0);
 	// }
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#deleteCustAcctMapReference(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.billing.Account)
+	 */
+
 	@WebMethod
 	public void deleteCustAcctMapReference(
 			Customer customer, Account account) {
@@ -450,6 +531,13 @@ public class TSCPMVNA {
 		}
 		customer.deleteCustAccts(account);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#deleteCustAddress(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.customer.dao.CustAddress)
+	 */
 
 	@WebMethod
 	public List<CustAddress> deleteCustAddress(
@@ -468,6 +556,13 @@ public class TSCPMVNA {
 		return customer.getCustAddressList(custAddress.getAddressId());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#deleteDeviceInfoObject(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.device.OldDevice)
+	 */
+
 	@WebMethod
 	public List<OldDevice> deleteDeviceInfoObject(
 			Customer customer, OldDevice device) {
@@ -485,12 +580,12 @@ public class TSCPMVNA {
 		return customer.retrieveDeviceList();
 	}
 
-	/**
-	 * Disconnects the device from the Network only.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param networkInfo
-	 * @throws DisconnectException
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#disconnectFromNetwork(com.tscp.mvna.account.device.network.OldNetworkInfo)
 	 */
+
 	@WebMethod
 	public void disconnectFromNetwork(
 			OldNetworkInfo networkInfo) throws DisconnectException {
@@ -498,13 +593,10 @@ public class TSCPMVNA {
 		networkService.disconnect(networkInfo);
 	}
 
-	/**
-	 * Disconnects the device from the Network and Kenan then updates the device's status.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @throws DisconnectException
-	 * @throws NetworkQueryException
-	 * @throws NetworkException
-	 * @throws ProvisionException
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#disconnectService(com.tscp.mvne.billing.provisioning.ServiceInstance)
 	 */
 
 	@WebMethod
@@ -573,12 +665,13 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("disconnectService");
 	}
 
-	/**
-	 * Disconnects the service in Kenan only.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param account
-	 * @param serviceInstance
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#disconnectServiceInstanceFromKenan(com.tscp.mvne.billing.Account,
+	 * com.tscp.mvne.billing.provisioning.ServiceInstance)
 	 */
+
 	@WebMethod
 	public void disconnectServiceInstanceFromKenan(
 			Account account, ServiceInstance serviceInstance) {
@@ -594,6 +687,12 @@ public class TSCPMVNA {
 		billService.deleteServiceInstance(account, serviceInstance);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getAccountInfo(int)
+	 */
+
 	@WebMethod
 	public Account getAccountInfo(
 			int accountNumber) {
@@ -602,6 +701,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodReturn("getAccountInfo", account);
 		return account;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getUnlinkedAccount(int)
+	 */
 
 	@WebMethod
 	public Account getUnlinkedAccount(
@@ -655,15 +760,12 @@ public class TSCPMVNA {
 		return accountStatus;
 	}
 
-	/**
-	 * Temporary "lightweight" method to get the full state of the account.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param custId
-	 * @param accountNo
-	 * @param deviceId
-	 * @return
-	 * @throws NetworkQueryException
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getAccountStatus(int, int, int)
 	 */
+
 	@WebMethod
 	public AccountStatus getAccountStatus(
 			int custId, int accountNo, int deviceId) throws DeviceException, NetworkException, ProvisionException, NetworkQueryException {
@@ -686,6 +788,13 @@ public class TSCPMVNA {
 		return getAccountStatus(custId, accountNo, device, externalId);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getContracts(com.tscp.mvne.billing.Account,
+	 * com.tscp.mvne.billing.provisioning.ServiceInstance)
+	 */
+
 	@WebMethod
 	public List<KenanContract> getContracts(
 			Account account, ServiceInstance serviceInstance) {
@@ -694,6 +803,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("getContracts");
 		return contracts;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCreditCardDetail(int)
+	 */
 
 	@WebMethod
 	public OldCreditCard getCreditCardDetail(
@@ -705,6 +820,12 @@ public class TSCPMVNA {
 		// return creditCard;
 		return null;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustAddressList(com.tscp.mvne.customer.Customer, int)
+	 */
 
 	@WebMethod
 	public List<CustAddress> getCustAddressList(
@@ -718,12 +839,24 @@ public class TSCPMVNA {
 		return customer.getCustAddressList(addressId);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustFromAccount(int)
+	 */
+
 	@WebMethod
 	public CustAcctMapDAO getCustFromAccount(
 			int accountno) {
 		Customer customer = new Customer();
 		return customer.getCustAcctMapDAOfromAccount(accountno);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustInfo(com.tscp.mvne.customer.Customer)
+	 */
 
 	@WebMethod
 	public CustInfo getCustInfo(
@@ -733,6 +866,12 @@ public class TSCPMVNA {
 		}
 		return customer.getCustInfo();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustomerAccounts(int)
+	 */
 
 	@WebMethod
 	public List<CustAcctMapDAO> getCustomerAccounts(
@@ -749,11 +888,24 @@ public class TSCPMVNA {
 		return custAcctList;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustomerChargeHistory(com.tscp.mvne.customer.Customer, int,
+	 * java.lang.String)
+	 */
+
 	@WebMethod
 	public List<OldUsageDetail> getCustomerChargeHistory(
 			Customer customer, int accountNo, String mdn) {
 		return customer.getChargeHistory(accountNo, mdn);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getActivity(int, java.lang.String, java.util.Date, java.util.Date)
+	 */
 
 	@WebMethod
 	public List<OldUsageDetail> getActivity(
@@ -777,6 +929,12 @@ public class TSCPMVNA {
 		return usageDetailList;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustomerInvoice(com.tscp.mvne.customer.Customer, int)
+	 */
+
 	@WebMethod
 	public PaymentInvoice getCustomerInvoice(
 			Customer customer, int transId) {
@@ -785,6 +943,12 @@ public class TSCPMVNA {
 		}
 		return customer.getPaymentInvoice(transId);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustPaymentList(int, int)
+	 */
 
 	@WebMethod
 	public List<CustPmtMap> getCustPaymentList(
@@ -801,6 +965,13 @@ public class TSCPMVNA {
 		return custPaymentList;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getCustTopUpAmount(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.billing.Account)
+	 */
+
 	@WebMethod
 	public CustTopUp getCustTopUpAmount(
 			Customer customer, Account account) {
@@ -809,6 +980,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodReturn("getCustTopUpAmount", topUp);
 		return topUp;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getDeviceList(com.tscp.mvne.customer.Customer)
+	 */
 
 	@WebMethod
 	public List<OldDevice> getDeviceList(
@@ -821,6 +998,12 @@ public class TSCPMVNA {
 		return customer.retrieveDeviceList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getKenanPayments(com.tscp.mvne.billing.Account)
+	 */
+
 	@WebMethod
 	public List<KenanPayment> getKenanPayments(
 			Account account) {
@@ -829,6 +1012,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("getKenanPayments");
 		return payments;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getNetworkInfo(java.lang.String, java.lang.String)
+	 */
 
 	@WebMethod
 	public OldNetworkInfo getNetworkInfo(
@@ -839,11 +1028,23 @@ public class TSCPMVNA {
 		return networkInfo;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getPaymentHistory(com.tscp.mvne.customer.Customer)
+	 */
+
 	@WebMethod
 	public List<PaymentRecord> getPaymentHistory(
 			Customer customer) {
 		return customer.getPaymentHistory();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getSwapNetworkInfo(java.lang.String, java.lang.String)
+	 */
 
 	@WebMethod
 	public OldNetworkInfo getSwapNetworkInfo(
@@ -853,6 +1054,13 @@ public class TSCPMVNA {
 		MethodLogger.logMethodReturn("getSwapNetworkInfo", networkInfo);
 		return networkInfo;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#getUsageSummary(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.billing.provisioning.ServiceInstance)
+	 */
 
 	@WebMethod
 	public OldUsageSUmmary getUsageSummary(
@@ -910,6 +1118,12 @@ public class TSCPMVNA {
 		return usage;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#init()
+	 */
+
 	@WebMethod(exclude = true)
 	public void init() {
 		// logger = new TscpmvneLogger();
@@ -923,6 +1137,12 @@ public class TSCPMVNA {
 		notificationSender = new NotificationSender();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#makePaymentById(java.lang.String, int, int, int, java.lang.String)
+	 */
+
 	@WebMethod
 	public PaymentUnitResponse makePaymentById(
 			String sessionId, int custId, int accountNo, int paymentId, String amount) throws ProvisionException, BillingException, DeviceException, NetworkException, RestoreException, NetworkQueryException, SuspendException {
@@ -932,6 +1152,12 @@ public class TSCPMVNA {
 		customer.setId(custId);
 		return submitPaymentByPaymentId(sessionId, customer, paymentId, account, amount);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#paymentUpdatedRoutine(com.tscp.mvne.customer.Customer)
+	 */
 
 	@WebMethod
 	public void paymentUpdatedRoutine(
@@ -970,18 +1196,13 @@ public class TSCPMVNA {
 		billService.reactivateBillingAccount(accountNumber);
 	}
 
-	/**
-	 * Used to reinstate the customer's Device when it is deactivated and add the appropriate component. This will assign
-	 * a new MDN to the device.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param customer
-	 * @param device
-	 * @return
-	 * @throws ReserveException
-	 * @throws NetworkQueryException
-	 * @throws NetworkException
-	 * @throws ProvisionException
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#reinstallCustomerDevice(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.device.OldDevice)
 	 */
+
 	@WebMethod
 	public OldNetworkInfo reinstallCustomerDevice(
 			Customer customer, OldDevice device) throws ReserveException, NetworkException, NetworkQueryException, ProvisionException {
@@ -1112,6 +1333,12 @@ public class TSCPMVNA {
 		return networkInfo;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#reserveMDN()
+	 */
+
 	@WebMethod
 	public OldNetworkInfo reserveMDN() throws ReserveException {
 		MethodLogger.logMethod("reserveMdn");
@@ -1122,6 +1349,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodReturn("reserveMdn", networkInfo);
 		return networkInfo;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#restoreAccount(int, int, int)
+	 */
 
 	@WebMethod
 	public void restoreAccount(
@@ -1192,6 +1425,13 @@ public class TSCPMVNA {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#reverseKenanPayment(com.tscp.mvne.billing.Account, java.lang.String,
+	 * java.util.Date, java.lang.String)
+	 */
+
 	@WebMethod
 	public void reverseKenanPayment(
 			Account account, String amount, Date transDate, String trackingId) {
@@ -1199,6 +1439,13 @@ public class TSCPMVNA {
 		refundService.reversePayment(account, amount, transDate, trackingId);
 		MethodLogger.logMethodExit("reversePayment");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#sendNotification(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.notification.dao.EmailNotification)
+	 */
 
 	@WebMethod
 	public void sendNotification(
@@ -1435,6 +1682,12 @@ public class TSCPMVNA {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#testSendWelcomeNotification(int, int)
+	 */
+
 	@WebMethod
 	public void testSendWelcomeNotification(
 			int custId, int accountNo) {
@@ -1444,6 +1697,12 @@ public class TSCPMVNA {
 		sendActivationSuccessNotice(customer, account);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#testSendPaymentFailedNotification(int, int)
+	 */
+
 	@WebMethod
 	public void testSendPaymentFailedNotification(
 			int custId, int accountNo) {
@@ -1452,6 +1711,13 @@ public class TSCPMVNA {
 		Account account = getAccountInfo(accountNo);
 		sendPaymentFailedNotification(customer, account, null);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#sendActivationSuccessNotice(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.billing.Account)
+	 */
 
 	@WebMethod
 	public void sendActivationSuccessNotice(
@@ -1498,6 +1764,12 @@ public class TSCPMVNA {
 		notificationSender.send(notification);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#sendRegistrationSuccessNotice(int, java.lang.String, java.lang.String)
+	 */
+
 	@WebMethod
 	public void sendRegistrationSuccessNotice(
 			int custId, String email, String username) {
@@ -1529,6 +1801,13 @@ public class TSCPMVNA {
 		notificationSender.send(notification);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#setCustTopUpAmount(com.tscp.mvne.customer.Customer, java.lang.String,
+	 * com.tscp.mvne.billing.Account)
+	 */
+
 	@WebMethod
 	public CustTopUp setCustTopUpAmount(
 			Customer customer, String topUpAmount, Account account) {
@@ -1538,15 +1817,13 @@ public class TSCPMVNA {
 		return topUp;
 	}
 
-	/**
-	 * Use submitPaymentByaymentId as all credit cards should be saved in the database.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param sessionId
-	 * @param account
-	 * @param creditCard
-	 * @param paymentAmount
-	 * @return
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#submitPaymentByCreditCard(java.lang.String, com.tscp.mvne.billing.Account,
+	 * com.tscp.mvne.payment.dao.OldCreditCard, java.lang.String)
 	 */
+
 	@Deprecated
 	@WebMethod
 	public PaymentUnitResponse submitPaymentByCreditCard(
@@ -1662,6 +1939,13 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("submitPaymentByCreditCard");
 		return response;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#submitPaymentByPaymentId(java.lang.String, com.tscp.mvne.customer.Customer,
+	 * int, com.tscp.mvne.billing.Account, java.lang.String)
+	 */
 
 	@WebMethod
 	public PaymentUnitResponse submitPaymentByPaymentId(
@@ -1930,6 +2214,12 @@ public class TSCPMVNA {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#suspendAccount(int, int, int)
+	 */
+
 	@WebMethod
 	public void suspendAccount(
 			int custId, int accountNo, int deviceId) throws BillingException, ProvisionException, DeviceException, NetworkException, NetworkQueryException, SuspendException {
@@ -2008,6 +2298,13 @@ public class TSCPMVNA {
 		deviceAssociation.save();
 		logger.info("finished updating device history");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#swapDevice(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvna.account.device.network.OldNetworkInfo, com.tscp.mvne.device.OldDevice)
+	 */
 
 	@WebMethod
 	public OldNetworkInfo swapDevice(
@@ -2094,6 +2391,12 @@ public class TSCPMVNA {
 		return newNetworkInfo;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateAccountEmailAddress(com.tscp.mvne.billing.Account)
+	 */
+
 	@WebMethod
 	public void updateAccountEmailAddress(
 			Account account) {
@@ -2107,6 +2410,12 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("updateAccountEmailAddress");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateContract(com.tscp.mvne.billing.contract.KenanContract)
+	 */
+
 	@WebMethod
 	public void updateContract(
 			KenanContract contract) {
@@ -2116,12 +2425,13 @@ public class TSCPMVNA {
 		MethodLogger.logMethodExit("updateContract");
 	}
 
-	/**
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param customer
-	 * @param creditCard
-	 * @return
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateCreditCardPaymentMethod(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.payment.dao.OldCreditCard)
 	 */
+
 	@WebMethod
 	public List<CustPmtMap> updateCreditCardPaymentMethod(
 			Customer customer, OldCreditCard creditCard) {
@@ -2141,6 +2451,13 @@ public class TSCPMVNA {
 		return customer.getCustpmttypes(creditCard.getPaymentId());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateCustAddress(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.customer.dao.CustAddress)
+	 */
+
 	@WebMethod
 	public List<CustAddress> updateCustAddress(
 			Customer customer, CustAddress custAddress) {
@@ -2156,6 +2473,12 @@ public class TSCPMVNA {
 		custAddress.save();
 		return customer.getCustAddressList(custAddress.getAddressId());
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateCustPaymentMap(com.tscp.mvne.payment.dao.CustPmtMap)
+	 */
 
 	@WebMethod
 	public List<CustPmtMap> updateCustPaymentMap(
@@ -2185,6 +2508,13 @@ public class TSCPMVNA {
 		custPmtMap.update();
 		return customer.getCustpmttypes(0);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.tscp.mvne.TSCPMVNA_INTERFACE#updateDeviceInfoObject(com.tscp.mvne.customer.Customer,
+	 * com.tscp.mvne.device.OldDevice)
+	 */
 
 	@WebMethod
 	public void updateDeviceInfoObject(

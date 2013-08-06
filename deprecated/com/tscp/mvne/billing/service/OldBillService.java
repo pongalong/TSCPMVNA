@@ -43,7 +43,7 @@ import com.telscape.billingserviceinterface.PkgComponent;
 import com.telscape.billingserviceinterface.ServiceHolder;
 import com.telscape.billingserviceinterface.UsageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
-import com.tscp.mvna.account.kenan.UnlinkedAccount;
+import com.tscp.mvna.account.UnlinkedAccount;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultBillingPackage;
 import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultBillingService;

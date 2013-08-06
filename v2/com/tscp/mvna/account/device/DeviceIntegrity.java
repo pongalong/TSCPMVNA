@@ -11,6 +11,7 @@ import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.provision.ServicePackage;
 import com.tscp.mvne.config.PROVISION;
 
+//TODO change problemObject and description to a List to provide multiple errors
 @XmlRootElement
 public class DeviceIntegrity {
 	private boolean sane;
@@ -26,9 +27,9 @@ public class DeviceIntegrity {
 			DeviceAndService device) {
 
 		NetworkInfo ni = device.getNetworkInfo();
-		ServiceInstance si = device.getServiceInstance();
-		ServicePackage sp = device.getServicePackage();
-		ServiceComponent sc = device.getServiceComponent();
+		ServiceInstance si = device.getService().getActiveServiceInstance();
+		ServicePackage sp = device.getService().getActiveServicePackage();
+		ServiceComponent sc = device.getService().getActiveServiceComponent();
 
 		// NULL checks
 		if (ni == null) {

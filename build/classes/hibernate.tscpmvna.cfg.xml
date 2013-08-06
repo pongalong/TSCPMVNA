@@ -17,7 +17,6 @@
     <property name="connection.username">TSCPMVNA</property>
     <property name="connection.password">TSCPMVNA</property>
 
-
     <!-- <property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property> <property name="dialect">org.hibernate.dialect.OracleDialect</property> -->
 
     <property name="connect.driver_class">oracle.jdbc.OracleDriver</property>
@@ -38,7 +37,9 @@
     <mapping class="com.tscp.mvna.account.device.Device" />
     <mapping class="com.tscp.mvna.account.device.DeviceAndService" />
     <mapping class="com.tscp.mvna.account.device.DeviceHistory" />
+    <mapping class="com.tscp.mvna.account.device.Topup" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
+    <mapping class="com.tscp.mvna.account.payment.PaymentRequest" />
 
     <!-- mappings for stored procedures -->
     <mapping resource="queries.hbm.xml" />

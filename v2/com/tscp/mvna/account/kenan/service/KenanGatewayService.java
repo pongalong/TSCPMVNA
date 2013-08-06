@@ -1,16 +1,24 @@
 package com.tscp.mvna.account.kenan.service;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.ArrayOfMessageHolder;
+import com.telscape.billingserviceinterface.ArrayOfPaymentHolder;
 import com.telscape.billingserviceinterface.ArrayOfValueHolder;
 import com.telscape.billingserviceinterface.MessageHolder;
+import com.telscape.billingserviceinterface.PaymentHolder;
+import com.telscape.billingserviceinterface.UsageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
 import com.tscp.mvna.account.kenan.exception.KenanException;
+import com.tscp.mvne.billing.Account;
+import com.tscp.mvne.billing.provisioning.ServiceInstance;
 
 public class KenanGatewayService extends KenanGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(KenanGatewayService.class);
+	protected static final String USERNAME = KenanGatewayService.class.getSimpleName();
 
 	/* **************************************************
 	 * Server Response Validation Methods
@@ -66,5 +74,34 @@ public class KenanGatewayService extends KenanGateway {
 				throw new KenanException("Error from server " + getUrl());
 
 		return response;
+	}
+
+	/* **************************************************
+	 * UNIMPLEMENTED
+	 */
+
+	// TODO IMPLEMENT THESE METHODS PROPERLY
+	
+	public UsageHolder getUnbilledUsageSummary(
+			ServiceInstance serviceInstance) {
+		UsageHolder usageHolder = port.getUnbilledDataMBs(USERNAME, serviceInstance.getExternalId());
+		return usageHolder;
+	}
+
+	public List<PaymentHolder> getPaymentHistory(
+			Account account) {
+		ArrayOfPaymentHolder paymentHolderList = port.getCompletePaymentHistory(USERNAME, Integer.toString(account.getAccountNo()));
+		return paymentHolderList.getPaymentHolder();
+	}
+
+	public int getAccountNoByTN(
+			String externalId) {
+		ValueHolder value = port.getAccountNo(USERNAME, externalId);
+		if (value != null) {
+			if (value.getValue() != null) {
+				return Integer.parseInt(value.getValue());
+			}
+		}
+		return 0;
 	}
 }

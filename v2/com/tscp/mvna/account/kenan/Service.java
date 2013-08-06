@@ -29,18 +29,28 @@ import com.tscp.mvna.account.kenan.provision.service.ProvisionServicePackageServ
 import com.tscp.mvne.config.PROVISION;
 
 @XmlRootElement
-public class Service {
+public class Service implements KenanObject {
 	protected static final Logger logger = LoggerFactory.getLogger(Service.class);
+
 	protected KenanAccount account;
 	protected List<ServiceInstance> serviceInstances;
 	protected List<ServicePackage> servicePackages;
 	protected List<ServiceComponent> serviceComponents;
+
 	protected boolean loadedServiceInstances;
 	protected boolean loadedServicePackages;
 	protected boolean loadedServiceComponents;
 
+	/* **************************************************
+	 * Constructors
+	 */
+
 	protected Service() {
 		// do nothing
+	}
+
+	public Service(KenanAccount account) {
+		this.account = account;
 	}
 
 	public Service(ServiceInstance newServiceInstance) throws ServiceConnectException {
@@ -161,32 +171,32 @@ public class Service {
 	 * Fetch Methods
 	 */
 
+	@Override
+	public boolean isLoaded() {
+		return loadedServiceInstances && loadedServicePackages && loadedServiceComponents;
+	}
+
+	@Override
 	public void refresh() {
 		loadedServiceInstances = false;
 		loadedServicePackages = false;
 		loadedServiceComponents = false;
-		serviceInstances = loadServiceInstances();
-		servicePackages = loadServicePackages();
-		serviceComponents = loadServiceComponents();
-	}
-
-	@XmlTransient
-	protected KenanAccount getAccount() {
-		return account;
-	}
-
-	protected void setAccount(
-			KenanAccount account) {
-		this.account = account;
+		// serviceInstances = loadServiceInstances();
+		// servicePackages = loadServicePackages();
+		// serviceComponents = loadServiceComponents();
 	}
 
 	protected List<ServiceComponent> loadServiceComponents() {
-		try {
-			if (getServiceInstances() == null)
-				return null;
+		List<ServiceComponent> temp;
+		List<ServiceComponent> result;
 
-			List<ServiceComponent> result = new ArrayList<ServiceComponent>();
-			List<ServiceComponent> temp;
+		try {
+			if (getServiceInstances() == null) {
+				logger.warn("Cannot load ServiceComponents because {} has no ServiceInstances", this);
+				return null;
+			}
+
+			result = new ArrayList<ServiceComponent>();
 
 			for (ServiceInstance si : getServiceInstances()) {
 				temp = ProvisionServiceComponentService.getActiveComponents(account.getAccountNo(), si);
@@ -200,18 +210,20 @@ public class Service {
 			return null;
 		} finally {
 			loadedServiceComponents = true;
+			temp = null;
 		}
 	}
 
 	protected List<ServicePackage> loadServicePackages() {
 		try {
-			if (getServiceInstances() == null)
+			if (getServiceInstances() == null) {
+				logger.warn("Cannot load ServicePackages because {} has no ServiceInstances", this);
 				return null;
+			}
 
 			List<ServicePackage> result = ProvisionServicePackageService.getActivePackages(account.getAccountNo());
-			if (result != null)
-				if (result == null || result.isEmpty())
-					logger.warn("{} has no active ServicePackage", this);
+			if (result == null || result.isEmpty())
+				logger.warn("{} has no active ServicePackage", this);
 			return result;
 		} catch (ProvisionFetchException e) {
 			return null;
@@ -224,10 +236,8 @@ public class Service {
 		try {
 			List<ServiceInstance> result = ProvisionServiceInstanceService.getActiveServices(account.getAccountNo());
 			if (result != null)
-				for (ServiceInstance si : result) {
-					logger.debug("loaded {} and setting account as {}", si, account);
+				for (ServiceInstance si : result)
 					si.setAccount(account);
-				}
 			return result;
 		} catch (ProvisionFetchException e) {
 			logger.error("Unable to fetch ServiceInstances for {}", this);
@@ -241,6 +251,16 @@ public class Service {
 	 * Getter and Setters: These are protected and viewable by KenanAccount, which can have any number of ServiceInstance,
 	 * ServicePackage and ServiceComponent
 	 */
+
+	@XmlTransient
+	protected KenanAccount getAccount() {
+		return account;
+	}
+
+	protected void setAccount(
+			KenanAccount account) {
+		this.account = account;
+	}
 
 	@XmlTransient
 	protected List<ServicePackage> getServicePackages() {
@@ -321,6 +341,11 @@ public class Service {
 	@XmlTransient
 	public boolean hasServiceInstances() {
 		return serviceInstances != null && !serviceInstances.isEmpty();
+	}
+
+	@Override
+	public String toString() {
+		return "Service [account=" + account + "]";
 	}
 
 }

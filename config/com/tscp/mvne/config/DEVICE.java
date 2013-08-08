@@ -1,6 +1,6 @@
 package com.tscp.mvne.config;
 
-import com.tscp.mvna.ws.InitializationException;
+import com.tscp.mvna.ws.exception.InitializationException;
 
 /**
  * ESN and MEID lenghts are static final because of switch statments in

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.mail.internet.InternetAddress;
 
-import com.tscp.mvna.ws.InitializationException;
+import com.tscp.mvna.ws.exception.InitializationException;
 import com.tscp.mvne.notification.NotificationClient;
 
 public class NOTIFICATION extends CONFIG {

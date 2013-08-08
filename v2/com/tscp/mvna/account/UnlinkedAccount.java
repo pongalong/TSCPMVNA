@@ -5,6 +5,8 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -69,6 +71,7 @@ public class UnlinkedAccount implements Serializable {
 
 	@Column(name = "pmt_trans_date")
 	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Temporal(TemporalType.DATE)
 	@XmlJavaTypeAdapter(DateTimeAdapter.class)
 	public DateTime getPaymentTransDate() {
 		return paymentTransDate;

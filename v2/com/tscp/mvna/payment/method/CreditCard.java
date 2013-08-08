@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.eclipse.persistence.oxm.annotations.XmlInverseReference;
 import org.hibernate.annotations.Type;
 
-import com.tscp.mvna.user.customer.Customer;
+import com.tscp.mvna.user.Customer;
 
 @Entity
 @Table(name = "PMT_CREDITCARD")
@@ -35,9 +35,22 @@ public class CreditCard implements Serializable {
 	private String cardNumber;
 	private String csc;
 	private String expirationDate;
-	private boolean enabled;
 	private PaymentInfo paymentInfo;
 	private Customer customer;
+
+	private boolean enabled;
+
+	@Column(name = "enabled")
+	@Type(type = "yes_no")
+	@XmlAttribute
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(
+			boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	/* **************************************************
 	 * Getters and Setters
@@ -85,18 +98,6 @@ public class CreditCard implements Serializable {
 	public void setExpirationDate(
 			String expirationDate) {
 		this.expirationDate = expirationDate;
-	}
-
-	@Column(name = "enabled")
-	@Type(type = "yes_no")
-	@XmlAttribute
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	public void setEnabled(
-			boolean enabled) {
-		this.enabled = enabled;
 	}
 
 	@OneToOne(mappedBy = "creditCard", cascade = CascadeType.ALL)

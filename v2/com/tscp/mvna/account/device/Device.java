@@ -38,7 +38,7 @@ import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvna.payment.method.CreditCard;
-import com.tscp.mvna.user.customer.Customer;
+import com.tscp.mvna.user.Customer;
 
 @XmlSeeAlso({ DeviceAndService.class })
 @MappedSuperclass
@@ -47,7 +47,7 @@ public abstract class Device extends NetworkDevice {
 	protected int id;
 	protected String value;
 	protected String name;
-	protected Customer customer;
+	protected Customer owner;
 	protected Account account;
 	protected CreditCard paymentMethod;
 	protected List<DeviceHistory> history;
@@ -211,15 +211,15 @@ public abstract class Device extends NetworkDevice {
 
 	@Transient
 	@XmlTransient
-	public Customer getCustomer() {
-		if (customer == null && account != null)
-			customer = getAccount().getCustomer();
-		return customer;
+	public Customer getOwner() {
+		if (owner == null && account != null)
+			owner = getAccount().getOwner();
+		return owner;
 	}
 
-	public void setCustomer(
-			Customer customer) {
-		this.customer = customer;
+	public void setOwner(
+			Customer owner) {
+		this.owner = owner;
 	}
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -253,8 +253,8 @@ public abstract class Device extends NetworkDevice {
 	@Transient
 	@XmlAttribute
 	public int getCustomerId() {
-		if (getCustomer() != null)
-			return customer.getId();
+		if (getOwner() != null)
+			return owner.getId();
 		return 0;
 	}
 

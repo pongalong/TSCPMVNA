@@ -8,7 +8,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import com.tscp.mvna.account.Account;
 import com.tscp.mvna.dao.Dao;
-import com.tscp.mvna.user.customer.Customer;
+import com.tscp.mvna.user.Customer;
 
 @SuppressWarnings("unused")
 public class ContextTester {

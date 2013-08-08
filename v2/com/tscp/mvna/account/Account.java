@@ -33,7 +33,7 @@ import com.tscp.mvna.account.kenan.exception.AccountUpdateException;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.service.AccountService;
-import com.tscp.mvna.user.customer.Customer;
+import com.tscp.mvna.user.Customer;
 import com.tscp.mvne.config.PROVISION;
 
 @Entity
@@ -41,11 +41,8 @@ import com.tscp.mvne.config.PROVISION;
 @XmlRootElement
 public class Account extends KenanAccount implements Serializable {
 	private static final long serialVersionUID = 39652240104589366L;
-
 	protected static final Logger logger = LoggerFactory.getLogger(Account.class);
-	protected static final String USERNAME = Account.class.getSimpleName();
-
-	protected Customer customer;
+	protected Customer owner;
 	protected List<DeviceAndService> devices;
 
 	/* **************************************************
@@ -149,13 +146,13 @@ public class Account extends KenanAccount implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "ACCOUNT_MAP", joinColumns = @JoinColumn(name = "ACCOUNT_NO"), inverseJoinColumns = @JoinColumn(name = "CUST_ID"))
 	@XmlTransient
-	public Customer getCustomer() {
-		return customer;
+	public Customer getOwner() {
+		return owner;
 	}
 
-	public void setCustomer(
-			Customer customer) {
-		this.customer = customer;
+	public void setOwner(
+			Customer owner) {
+		this.owner = owner;
 	}
 
 	/* **************************************************
@@ -165,8 +162,8 @@ public class Account extends KenanAccount implements Serializable {
 	@Transient
 	@XmlAttribute
 	public int getCustomerId() {
-		if (getCustomer() != null)
-			return customer.getId();
+		if (getOwner() != null)
+			return owner.getId();
 		return 0;
 	}
 
@@ -186,7 +183,7 @@ public class Account extends KenanAccount implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Account [accountNo=" + accountNo + ", customer=" + customer.getId() + "]";
+		return "Account [accountNo=" + accountNo + ", customer=" + owner.getId() + "]";
 	}
 
 }

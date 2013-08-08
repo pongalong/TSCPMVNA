@@ -4,6 +4,17 @@
 
 <hibernate-mapping package="com.tscp.mvna">
 
+  <sql-query name="submit_payment" callable="true">
+    <return class="com.tscp.mvna.payment.service.PaymentGatewayResponse">
+      <return-property name="gatewayTransactionId" column="transid" />
+      <return-property name="confirmationCode" column="confcode" />
+      <return-property name="confirmationMsg" column="confdescr" />
+      <return-property name="authorizationCode" column="authcode" />
+      <return-property name="cvvCode" column="cvvcode" />
+    </return>
+    <![CDATA[ call MVNA_API_PKG.SBT_PMT_INFO(?, :1_cust_id, :2_pmt_id, :3_amount) ]]>
+  </sql-query>
+
   <sql-query name="fetch_usage_history" callable="true">
     <return class="com.tscp.mvna.account.device.usage.UsageSession">
       <return-property name="dateTime" column="date_and_time" />
@@ -19,7 +30,7 @@
       <return-property name="externalId" column="external_id" />
       <return-property name="balance" column="balance" />
     </return>
-    { call sp_fetch_charge_history(?, :account_no, :external_id) }
+    <![CDATA[ call sp_fetch_charge_history(?, :1_account_no, :2_external_id) ]]>
   </sql-query>
 
   <sql-query name="fetch_unlinked_account" callable="true">
@@ -30,7 +41,7 @@
       <return-property name="paymentTransId" column="trans_id" />
       <return-property name="paymentTransDate" column="pmt_trans_date" />
     </return>
-    { call MVNA_API_PKG.fetch_unlinked_account(?, :cust_id) }
+    <![CDATA[ call MVNA_API_PKG.fetch_unlinked_account(?, :1_cust_id) ]]>
   </sql-query>
 
 </hibernate-mapping>

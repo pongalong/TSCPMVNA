@@ -50,7 +50,7 @@ import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultBillingServ
 import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultPkgComponent;
 import com.tscp.mvna.account.kenan.service.KenanGatewayProvider;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
-import com.tscp.mvna.ws.InitializationException;
+import com.tscp.mvna.ws.exception.InitializationException;
 import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.BillingUtil;
 import com.tscp.mvne.billing.exception.BillingException;

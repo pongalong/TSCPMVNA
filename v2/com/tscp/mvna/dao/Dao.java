@@ -1,6 +1,8 @@
 package com.tscp.mvna.dao;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -166,11 +168,19 @@ public class Dao {
 			Query query = session.getNamedQuery(namedQuery);
 			String[] parameters = query.getNamedParameters();
 
+			if (args.length != parameters.length)
+				throw new HibernateException("Number of arguments does not match number of parameters");
+
+			List<String> sortedParameters = new ArrayList<String>();
+			for (String p : parameters)
+				sortedParameters.add(p);
+			Collections.sort(sortedParameters);
+
 			// TODO check number of parameters match
 			logger.debug("Executing namedQuery {}", namedQuery);
 			for (int i = 0; i < args.length; i++) {
-				logger.debug("Parameter {} set to {}", parameters[i], args[args.length - i - 1]);
-				query.setParameter(parameters[i], args[args.length - i - 1]);
+				// logger.debug("Parameter {} set to {}", sortedParameters.get(i), args[i]);
+				query.setParameter(sortedParameters.get(i), args[i]);
 			}
 
 			List result = query.list();
@@ -178,7 +188,8 @@ public class Dao {
 			tx.commit();
 			return result;
 		} catch (HibernateException e) {
-			logger.error("Error executing named query {}.", namedQuery, e);
+			logger.error("Error executing named query {}: {} : {}", namedQuery, e.getMessage(), e.getCause());
+			e.printStackTrace();
 			return null;
 		} finally {
 			closeSession(session);

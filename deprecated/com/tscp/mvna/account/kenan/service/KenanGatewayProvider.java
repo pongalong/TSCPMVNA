@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.BillingServiceInterface;
 import com.telscape.billingserviceinterface.BillingServiceInterfaceSoap;
-import com.tscp.mvna.ws.InitializationException;
+import com.tscp.mvna.ws.exception.InitializationException;
 import com.tscp.mvne.config.CONFIG;
 import com.tscp.mvne.config.CONNECTION;
 

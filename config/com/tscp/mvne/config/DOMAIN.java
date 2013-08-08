@@ -1,6 +1,6 @@
 package com.tscp.mvne.config;
 
-import com.tscp.mvna.ws.InitializationException;
+import com.tscp.mvna.ws.exception.InitializationException;
 
 public class DOMAIN extends CONFIG {
 	public static String urlSupport;

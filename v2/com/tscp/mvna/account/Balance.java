@@ -1,11 +1,13 @@
 package com.tscp.mvna.account;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.joda.money.BigMoney;
+import org.joda.money.CurrencyUnit;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,18 +18,18 @@ import com.tscp.mvna.account.kenan.exception.BalanceFetchException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 
 @XmlRootElement
-public class Balance extends TimeSensitive implements KenanObject {
+public class Balance implements Serializable, KenanObject, TimeSensitive {
 	protected static final Logger logger = LoggerFactory.getLogger(Balance.class);
-	protected static final DecimalFormat df = new DecimalFormat("0.00000");
+	private static final long serialVersionUID = -6611563549733421204L;
 	protected int accountNo;
-	protected Double value;
+	protected BigMoney value;
 
 	/* **************************************************
 	 * Constructors
 	 */
 
 	protected Balance() {
-		// do nothing;
+		// prevent construction
 	}
 
 	public Balance(int accountNo) {
@@ -39,9 +41,18 @@ public class Balance extends TimeSensitive implements KenanObject {
 			if (valueHolder.getCustBalance() != null) {
 				if (valueHolder.getCustBalance().getAccountNo() != null && !valueHolder.getCustBalance().getAccountNo().isEmpty())
 					accountNo = Integer.parseInt(valueHolder.getCustBalance().getAccountNo());
-				value = valueHolder.getCustBalance().getRealBalance() * -1;
+				value = BigMoney.of(CurrencyUnit.USD, valueHolder.getCustBalance().getRealBalance() * -1);
 			}
 		}
+	}
+
+	public BigMoney getValue() {
+		return value;
+	}
+
+	public void setValue(
+			BigMoney value) {
+		this.value = value;
 	}
 
 	/* **************************************************
@@ -58,7 +69,7 @@ public class Balance extends TimeSensitive implements KenanObject {
 	@Override
 	public void refresh() {
 		try {
-			this.value = AccountService.getBalance(accountNo).getValue();
+			value = AccountService.getBalance(accountNo).getValue();
 		} catch (BalanceFetchException e) {
 			logger.error("Unable to fetch Balance for Account {}", accountNo);
 		} finally {
@@ -66,18 +77,12 @@ public class Balance extends TimeSensitive implements KenanObject {
 		}
 	}
 
-	/* **************************************************
-	 * Getters and Setters
-	 */
+	protected DateTime instantiationTime = new DateTime();
 
-	@XmlElement
-	public String getCurrencyValue() {
-		return value == null ? null : NumberFormat.getCurrencyInstance().format(value);
-	}
-
-	@XmlElement
-	public Double getValue() {
-		return value;
+	@Override
+	public boolean isStale() {
+		Period elapsed = new Period(instantiationTime, new DateTime());
+		return elapsed.getMinutes() > 15;
 	}
 
 	/* **************************************************

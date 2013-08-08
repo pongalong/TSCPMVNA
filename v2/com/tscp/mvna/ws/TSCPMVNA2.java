@@ -19,19 +19,29 @@ import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.device.usage.UsageHistory;
 import com.tscp.mvna.account.kenan.exception.AccountCreationException;
 import com.tscp.mvna.account.kenan.service.AccountService;
-import com.tscp.mvna.account.payment.PaymentRequest;
 import com.tscp.mvna.dao.Dao;
+import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.method.CreditCard;
-import com.tscp.mvna.user.customer.Customer;
+import com.tscp.mvna.user.Customer;
+import com.tscp.mvna.user.User;
+import com.tscp.mvna.user.UserEntity;
 
 @WebService
 @DatabindingMode(value = "eclipselink.jaxb")
 public class TSCPMVNA2 {
 	protected static final Logger logger = LoggerFactory.getLogger(TSCPMVNA2.class);
 
+	// TODO MAKE OBJECTS CACHEABLE WITH A CACHEABLE INTERFACE TO RETURN ID AND STALE
+
 	/* **************************************************
 	 * Fetch Object Methods
 	 */
+
+	@WebMethod
+	public User getUser(
+			int id) {
+		return (User) Dao.get(User.class, id);
+	}
 
 	@WebMethod
 	public Customer getCustomer(
@@ -130,46 +140,6 @@ public class TSCPMVNA2 {
 	public void updateEmail(
 			int accountNo, String newEmail) {
 		AccountService.updateEmail(accountNo, newEmail);
-	}
-
-	@WebMethod
-	public PaymentRequest makeTopup(
-			DeviceAndService device, String sessionId) {
-
-		device = getDevice(device.getId());
-
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setAccount(device.getAccount());
-		paymentRequest.setCreditCard(device.getPaymentMethod());
-		paymentRequest.setSessionId(sessionId);
-		paymentRequest.setAmount(device.getTopup().getAmount());
-
-		logger.debug("{}", device.getAccount());
-		logger.debug("{}", device.getPaymentMethod());
-
-		Dao.saveOrUpdate(paymentRequest);
-
-		return paymentRequest;
-	}
-
-	@WebMethod
-	public PaymentRequest makePayment(
-			DeviceAndService device, Double amount, String sessionId) {
-
-		device = getDevice(device.getId());
-
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setAccount(device.getAccount());
-		paymentRequest.setCreditCard(device.getPaymentMethod());
-		paymentRequest.setSessionId(sessionId);
-		paymentRequest.setAmount(amount);
-
-		logger.debug("{}", device.getAccount());
-		logger.debug("{}", device.getPaymentMethod());
-
-		Dao.saveOrUpdate(paymentRequest);
-
-		return paymentRequest;
 	}
 
 }

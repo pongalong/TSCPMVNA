@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
@@ -25,7 +27,8 @@ public class DeviceHistoryId implements Serializable {
 	}
 
 	@Column(name = "DATE_TIME")
-	@Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@Temporal(TemporalType.TIMESTAMP)
 	public DateTime getDateTime() {
 		return dateTime;
 	}

@@ -1,8 +1,6 @@
 package com.tscp.mvna.account.device;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,21 +10,36 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.money.Money;
 
 @Entity
 @Table(name = "DEVICE_TOPUP")
 public class Topup implements Serializable {
 	private static final long serialVersionUID = 2662262678054930566L;
-	protected static final DecimalFormat df = new DecimalFormat("0.00000");
-	private int deviceId;
 	private DeviceAndService device;
-	private Double amount;
+	private int deviceId;
+	private Money value;
+
+	/* **************************************************
+	 * Getters and Setters
+	 */
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@PrimaryKeyJoinColumn
+	@XmlTransient
+	protected DeviceAndService getDevice() {
+		return device;
+	}
+
+	protected void setDevice(
+			DeviceAndService device) {
+		this.device = device;
+	}
 
 	@GenericGenerator(name = "generator", strategy = "foreign", parameters = @Parameter(name = "property", value = "device"))
 	@Id
@@ -41,37 +54,24 @@ public class Topup implements Serializable {
 		this.deviceId = deviceId;
 	}
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@PrimaryKeyJoinColumn
-	@XmlTransient
-	protected DeviceAndService getDevice() {
-		return device;
-	}
-
-	protected void setDevice(
-			DeviceAndService device) {
-		this.device = device;
-	}
-
 	@Column(name = "amount")
-	public Double getAmount() {
-		return amount;
+	@Type(type = "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyAmount")
+	public Money getValue() {
+		return value;
 	}
 
-	public void setAmount(
-			Double amount) {
-		this.amount = amount;
+	public void setValue(
+			Money value) {
+		this.value = value;
 	}
+
+	/* **************************************************
+	 * Debug Methods
+	 */
 
 	@Override
 	public String toString() {
-		return "Topup [deviceId=" + deviceId + ", amount=" + amount + "]";
-	}
-
-	@Transient
-	@XmlElement
-	public String getCurrencyValue() {
-		return amount == null ? null : NumberFormat.getCurrencyInstance().format(amount);
+		return "Topup [deviceId=" + deviceId + ", value=" + value + "]";
 	}
 
 }

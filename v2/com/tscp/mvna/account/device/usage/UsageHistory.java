@@ -5,6 +5,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,7 @@ import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.dao.Dao;
 
 @XmlRootElement
-public class UsageHistory extends TimeSensitive implements KenanObject {
+public class UsageHistory implements KenanObject, TimeSensitive {
 	protected static final Logger logger = LoggerFactory.getLogger(UsageHistory.class);
 	private ServiceInstance serviceInstance;
 	private List<UsageSession> usageSessions;
@@ -85,6 +87,14 @@ public class UsageHistory extends TimeSensitive implements KenanObject {
 		} finally {
 			loaded = true;
 		}
+	}
+
+	protected DateTime instantiationTime = new DateTime();
+
+	@Override
+	public boolean isStale() {
+		Period elapsed = new Period(instantiationTime, new DateTime());
+		return elapsed.getMinutes() > 15;
 	}
 
 }

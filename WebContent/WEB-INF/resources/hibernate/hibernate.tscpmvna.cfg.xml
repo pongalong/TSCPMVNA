@@ -5,22 +5,22 @@
 
 <hibernate-configuration>
   <session-factory>
-
     <!-- <property name="connection.datasource">jdbc/TSCPMVNA_BACKEND</property> <property name="dialect">org.hibernate.dialect.OracleDialect</property> <property 
       name="current_session_context_class">thread</property> <property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property> <property 
       name="show_sql">false</property> -->
 
     <property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+    <!-- <property name="hibernate.show_sql">true</property> <property name="hibernate.format_sql">true</property> -->
 
     <!-- Direct connection to database -->
     <property name="connection.url">jdbc:oracle:thin:@uscael200:1521:K11MVNOT</property>
     <property name="connection.username">TSCPMVNA</property>
     <property name="connection.password">TSCPMVNA</property>
 
-    <!-- <property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property> <property name="dialect">org.hibernate.dialect.OracleDialect</property> -->
+    <property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+    <property name="dialect">org.hibernate.dialect.OracleDialect</property>
 
-    <property name="connect.driver_class">oracle.jdbc.OracleDriver</property>
-    <property name="dialect">org.hibernate.dialect.Oracle9iDialect</property>
+    <!-- <property name="connect.driver_class">oracle.jdbc.OracleDriver</property> <property name="dialect">org.hibernate.dialect.Oracle9iDialect</property> -->
 
     <property name="connection.pool_size">1</property>
     <property name="current_session_context_class">thread</property>
@@ -28,10 +28,15 @@
     <!-- Drop and re-create the database schema on startup -->
     <!--<property name="hbm2ddl.auto">update</property> -->
 
+    <property name="jadira.usertype.autoRegisterUserTypes">true</property>
+    <property name="jadira.usertype.databaseZone">jvm</property>
+    <property name="jadira.usertype.javaZone">jvm</property>
+    <property name="jadira.usertype.currencyCode">USD</property>
+
     <!-- mappings for annotated classes -->
-    <mapping class="com.tscp.mvna.payment.method.CreditCard" />
-    <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
-    <mapping class="com.tscp.mvna.user.customer.Customer" />
+    <mapping class="com.tscp.mvna.user.UserEntity" />
+    <mapping class="com.tscp.mvna.user.User" />
+    <mapping class="com.tscp.mvna.user.Customer" />
     <mapping class="com.tscp.mvna.account.Account" />
     <mapping class="com.tscp.mvna.account.UnlinkedAccount" />
     <mapping class="com.tscp.mvna.account.device.Device" />
@@ -39,7 +44,12 @@
     <mapping class="com.tscp.mvna.account.device.DeviceHistory" />
     <mapping class="com.tscp.mvna.account.device.Topup" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
-    <mapping class="com.tscp.mvna.account.payment.PaymentRequest" />
+    <mapping class="com.tscp.mvna.payment.PaymentRequest" />
+    <mapping class="com.tscp.mvna.payment.PaymentResponse" />
+    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponseEntity" />
+    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponse" />
+    <mapping class="com.tscp.mvna.payment.method.CreditCard" />
+    <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
 
     <!-- mappings for stored procedures -->
     <mapping resource="queries.hbm.xml" />

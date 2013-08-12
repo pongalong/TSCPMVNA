@@ -22,8 +22,7 @@ import org.joda.money.Money;
 import org.joda.time.DateTime;
 
 import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
-import com.tscp.mvna.account.Account;
-import com.tscp.mvna.account.device.Device;
+import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.User;
 import com.tscp.mvna.user.UserEntity;
@@ -34,7 +33,8 @@ public class PaymentRequest implements Serializable {
 	private static final long serialVersionUID = 2365845683459763290L;
 	private int transactionId;
 	private DateTime dateTime = new DateTime();
-	private Account account;
+	private DeviceAndService device;
+	private int accountNo;
 	private CreditCard creditCard;
 	private Money amount;
 	private UserEntity requestBy;
@@ -44,15 +44,16 @@ public class PaymentRequest implements Serializable {
 		// do nothing
 	}
 
-	public PaymentRequest(Device device) {
-		account = device.getAccount();
+	public PaymentRequest(DeviceAndService device) {
+		this.device = device;
+		accountNo = device.getAccount().getAccountNo();
 		creditCard = device.getPaymentMethod();
 		amount = device.getTopup().getValue();
 		requestBy = device.getOwner();
 	}
 
 	@Id
-	@Column(name = "id")
+	@Column(name = "TRANS_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "PMT_TRANS_ID_GEN")
 	@SequenceGenerator(name = "PMT_TRANS_ID_GEN", sequenceName = "PMT_TRANS_TRANS_ID_SEQ")
 	public int getTransactionId() {
@@ -77,15 +78,28 @@ public class PaymentRequest implements Serializable {
 		this.dateTime = dateTime;
 	}
 
+	// TODO device already contains an account object. this object needs to be rethought
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "account_no", nullable = false)
-	public Account getAccount() {
-		return account;
+	@JoinColumn(name = "device_id")
+	public DeviceAndService getDevice() {
+		return device;
 	}
 
-	public void setAccount(
-			Account account) {
-		this.account = account;
+	public void setDevice(
+			DeviceAndService device) {
+		this.device = device;
+	}
+
+	// @ManyToOne(fetch = FetchType.LAZY)
+	// @JoinColumn(name = "account_no", nullable = false)
+	@Column(name = "account_no")
+	public int getAccountNo() {
+		return accountNo;
+	}
+
+	public void setAccountNo(
+			int accountNo) {
+		this.accountNo = accountNo;
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -133,7 +147,7 @@ public class PaymentRequest implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PaymentRequest [transactionId=" + transactionId + ", dateTime=" + dateTime + ", account=" + account + ", creditCard=" + creditCard + ", amount=" + amount + "]";
+		return "PaymentRequest [transactionId=" + transactionId + ", dateTime=" + dateTime + ", account=" + accountNo + ", creditCard=" + creditCard + ", amount=" + amount + "]";
 	}
 
 }

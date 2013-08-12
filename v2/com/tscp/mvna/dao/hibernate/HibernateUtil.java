@@ -8,24 +8,11 @@ import org.hibernate.service.ServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HibernateUtil {
+public abstract class HibernateUtil {
 	protected static final Logger logger = LoggerFactory.getLogger(HibernateUtil.class);
-
-	protected static Configuration configuration = buildConfiguration();
+	protected static final Configuration configuration = buildConfiguration();
 	protected static final ServiceRegistry serviceRegistry = buildServiceRegistry();
 	protected static final SessionFactory sessionFactory = buildSessionFactory();
-
-	private static final SessionFactory buildSessionFactory() {
-		if (configuration == null)
-			configuration = buildConfiguration();
-
-		try {
-			return configuration.buildSessionFactory(serviceRegistry);
-		} catch (Throwable e) {
-			logger.error("Initial SessionFactory creation failed", e);
-			throw new ExceptionInInitializerError(e);
-		}
-	}
 
 	private static final Configuration buildConfiguration() {
 		try {
@@ -37,9 +24,16 @@ public class HibernateUtil {
 	}
 
 	private static final ServiceRegistry buildServiceRegistry() {
-		if (configuration == null)
-			configuration = buildConfiguration();
 		return new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry();
+	}
+
+	private static final SessionFactory buildSessionFactory() {
+		try {
+			return configuration.buildSessionFactory(serviceRegistry);
+		} catch (Throwable e) {
+			logger.error("Initial SessionFactory creation failed", e);
+			throw new ExceptionInInitializerError(e);
+		}
 	}
 
 	public static final SessionFactory getSessionFactory() {

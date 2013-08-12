@@ -55,7 +55,7 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@PrimaryKeyJoinColumn
 	@XmlTransient
-	protected PaymentRequest getPaymentRequest() {
+	public PaymentRequest getPaymentRequest() {
 		return paymentRequest;
 	}
 

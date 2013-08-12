@@ -10,7 +10,8 @@ import org.joda.money.format.MoneyFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tscp.mvna.account.device.Device;
+import com.tscp.mvna.account.device.DeviceAndService;
+import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.PaymentResponse;
@@ -25,7 +26,10 @@ public class PaymentService extends PaymentGateway {
 	public static final MoneyFormatter currencyStringFormatter = new MoneyFormatterBuilder().appendCurrencySymbolLocalized().append(stringFormatter).toFormatter();
 
 	public static PaymentRequest submitRequest(
-			Device device) throws PaymentServiceException {
+			DeviceAndService device) throws PaymentServiceException {
+
+		if (device == null)
+			throw new PaymentServiceException("No Device selected for PaymentRequest");
 
 		PaymentRequest request = new PaymentRequest(device);
 
@@ -43,6 +47,8 @@ public class PaymentService extends PaymentGateway {
 	public static PaymentResponse submitPayment(
 			PaymentRequest paymentRequest) throws PaymentServiceException {
 
+		if (paymentRequest == null)
+			throw new PaymentServiceException("No PaymentRequest to submit");
 		if (paymentRequest.getTransactionId() < 1)
 			throw new PaymentServiceException(paymentRequest.getClass().getSimpleName() + " does not have a valid Transaction ID");
 
@@ -70,5 +76,16 @@ public class PaymentService extends PaymentGateway {
 		}
 
 		return paymentResponse;
+	}
+
+	public static void submitRecord(
+			PaymentResponse paymentResponse) throws PaymentServiceException {
+
+		if (paymentResponse == null)
+			throw new PaymentServiceException("No PaymentResponse to record");
+		if (paymentResponse.getTransactionId() < 1)
+			throw new PaymentServiceException(paymentResponse.getClass().getSimpleName() + " does not have a valid Transaction ID");
+
+		AccountService.addPayment(paymentResponse);
 	}
 }

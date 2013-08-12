@@ -20,11 +20,10 @@ import com.tscp.mvna.account.device.usage.UsageHistory;
 import com.tscp.mvna.account.kenan.exception.AccountCreationException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
-import com.tscp.mvna.payment.PaymentRequest;
+import com.tscp.mvna.payment.PaymentTransaction;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.Customer;
 import com.tscp.mvna.user.User;
-import com.tscp.mvna.user.UserEntity;
 
 @WebService
 @DatabindingMode(value = "eclipselink.jaxb")
@@ -32,6 +31,9 @@ public class TSCPMVNA2 {
 	protected static final Logger logger = LoggerFactory.getLogger(TSCPMVNA2.class);
 
 	// TODO MAKE OBJECTS CACHEABLE WITH A CACHEABLE INTERFACE TO RETURN ID AND STALE
+	// TODO IMPLEMENT CONTRACTS
+	// TODO IMPLEMENT NOTIFICATIONS
+	// TODO IMPLEMENT REFUNDS
 
 	/* **************************************************
 	 * Fetch Object Methods
@@ -124,6 +126,16 @@ public class TSCPMVNA2 {
 		device = getDevice(device.getId());
 		device.restore();
 		return device;
+	}
+
+	@WebMethod
+	public PaymentTransaction submitTopup(
+			DeviceAndService device) {
+		device = getDevice(device.getId());
+
+		// TODO finish implementation in PaymentService
+
+		return null;
 	}
 
 	/* **************************************************

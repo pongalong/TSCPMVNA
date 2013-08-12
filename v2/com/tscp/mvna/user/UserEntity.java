@@ -12,7 +12,7 @@ public abstract class UserEntity implements Serializable {
 	private int id;
 
 	@Id
-	@Column(name = "ID")
+	@Column(name = "CUST_ID")
 	public int getId() {
 		return id;
 	}

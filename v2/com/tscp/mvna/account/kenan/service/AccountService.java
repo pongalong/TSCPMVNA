@@ -3,6 +3,8 @@ package com.tscp.mvna.account.kenan.service;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -29,6 +31,7 @@ import com.tscp.mvna.account.kenan.exception.AccountUpdateException;
 import com.tscp.mvna.account.kenan.exception.BalanceFetchException;
 import com.tscp.mvna.account.kenan.exception.ContactFetchException;
 import com.tscp.mvna.account.kenan.exception.KenanException;
+import com.tscp.mvna.account.kenan.exception.PaymentFetchException;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultBillingAccount;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultBillingName;
@@ -36,9 +39,17 @@ import com.tscp.mvna.account.kenan.service.account.defaults.DefaultContactInfo;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultCustAddress;
 import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
+import com.tscp.mvna.payment.PaymentHistory;
+import com.tscp.mvna.payment.PaymentRecord;
+import com.tscp.mvna.payment.PaymentRequest;
+import com.tscp.mvna.payment.PaymentResponse;
+import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
 import com.tscp.mvne.billing.provisioning.ProvisionUtil;
+import com.tscp.mvne.config.BILLING;
+import com.tscp.mvne.config.CONFIG;
+import com.tscp.util.DateUtils;
 
 public class AccountService extends KenanGatewayService {
 	protected static final Logger logger = LoggerFactory.getLogger(AccountService.class);
@@ -204,8 +215,53 @@ public class AccountService extends KenanGatewayService {
 	 * UNIMPLEMENTED
 	 */
 
-	public void addPayment() {
-		throw new NotImplementedException();
+	public static PaymentHistory getPaymentHistory(
+			int accountNo) throws PaymentFetchException {
+
+		if (accountNo < 1)
+			throw new PaymentFetchException("No account number specified");
+
+		try {
+
+			List<PaymentHolder> response = checkResponse(port.getCompletePaymentHistory(USERNAME, Integer.toString(accountNo)));
+			PaymentHistory paymentHistory = new PaymentHistory(response);
+			return paymentHistory;
+		} catch (KenanException e) {
+			e.printStackTrace();
+			throw new PaymentFetchException("Unable to fetch PaymentHistory for Account " + accountNo, e);
+		}
+	}
+
+	public static PaymentRecord addPayment(
+			PaymentResponse paymentResponse) throws AccountUpdateException {
+		PaymentRequest paymentRequest = paymentResponse.getPaymentRequest();
+
+		logger.debug("recording to account {}", paymentRequest);
+		ServiceInstance serviceInstance = paymentRequest.getDevice().getService().getActiveServiceInstance();
+		logger.debug("recording to {}", serviceInstance);
+
+		String amount = PaymentService.stringFormatter.print(paymentRequest.getAmount()).replace(".", "");
+		String accountNo = Integer.toString(paymentRequest.getAccountNo());
+		// XMLGregorianCalendar transDate = DateUtils.getXMLCalendar(paymentResponse.getResponseDate());
+		XMLGregorianCalendar transDate = DateUtils.getXMLCalendar();
+
+		// TODO set clientName as a property in configuration files;
+		try {
+			// logger.debug("Params: {}, {}, {}, {}, {}, {}, {}", USERNAME, serviceInstance.getExternalId(), 1, amount,
+			// transDate, BILLING.paymentTransType, "tcweb");
+			// checkResponse(port.addPayment(USERNAME, serviceInstance.getExternalId(), 1, amount, transDate,
+			// BILLING.paymentTransType, CONFIG.clientName));
+
+			logger.debug("Params: {}, {}, {}, {}, {}, {}, {}", USERNAME, accountNo, 1, amount, transDate, BILLING.paymentTransType, "tcweb");
+			checkResponse(port.addPayment(USERNAME, accountNo, 1, amount, transDate, BILLING.paymentTransType, CONFIG.clientName));
+
+			// TODO get the new tracking ID from paymentHistory and record the seviceInstance/device the payment was for
+			PaymentRecord paymentRecord = new PaymentRecord();
+			return paymentRecord;
+		} catch (KenanException e) {
+			throw new AccountUpdateException("Unable to add payment of " + amount + " to Account " + paymentRequest.getAccountNo(), e);
+		}
+
 	}
 
 	public Account getUnlinkedAccount(

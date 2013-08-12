@@ -13,7 +13,6 @@ import com.telscape.billingserviceinterface.PaymentHolder;
 import com.telscape.billingserviceinterface.UsageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
 import com.tscp.mvna.account.kenan.exception.KenanException;
-import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.provisioning.ServiceInstance;
 
 public class KenanGatewayService extends KenanGateway {
@@ -23,6 +22,19 @@ public class KenanGatewayService extends KenanGateway {
 	/* **************************************************
 	 * Server Response Validation Methods
 	 */
+
+	public static List<PaymentHolder> checkResponse(
+			ArrayOfPaymentHolder response) throws KenanException {
+
+		if (response == null)
+			throw new KenanException("No response received from server");
+		if (response.getPaymentHolder() == null)
+			throw new KenanException("Null response received from server");
+		if (response.getPaymentHolder().isEmpty())
+			throw new KenanException("Empty response received from server");
+
+		return response.getPaymentHolder();
+	}
 
 	public static MessageHolder checkResponse(
 			ArrayOfMessageHolder response) throws KenanException {
@@ -81,17 +93,11 @@ public class KenanGatewayService extends KenanGateway {
 	 */
 
 	// TODO IMPLEMENT THESE METHODS PROPERLY
-	
+
 	public UsageHolder getUnbilledUsageSummary(
 			ServiceInstance serviceInstance) {
 		UsageHolder usageHolder = port.getUnbilledDataMBs(USERNAME, serviceInstance.getExternalId());
 		return usageHolder;
-	}
-
-	public List<PaymentHolder> getPaymentHistory(
-			Account account) {
-		ArrayOfPaymentHolder paymentHolderList = port.getCompletePaymentHistory(USERNAME, Integer.toString(account.getAccountNo()));
-		return paymentHolderList.getPaymentHolder();
 	}
 
 	public int getAccountNoByTN(

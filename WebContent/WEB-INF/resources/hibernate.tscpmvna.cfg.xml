@@ -52,7 +52,7 @@
     <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
 
     <!-- mappings for stored procedures -->
-    <mapping resource="queries.hbm.xml" />
+    <mapping resource="hibernate.tscpmvna.queries.xml" />
 
   </session-factory>
 

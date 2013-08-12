@@ -75,7 +75,7 @@ public class DeviceHistory implements Serializable {
 		this.mdn = mdn;
 	}
 
-	@Column(name = "STATUS")
+	@Column(name = "STATUS_ID")
 	@Enumerated(EnumType.ORDINAL)
 	public NetworkStatus getStatus() {
 		return status;

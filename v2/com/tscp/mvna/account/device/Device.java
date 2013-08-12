@@ -162,7 +162,7 @@ public abstract class Device extends NetworkDevice {
 	 */
 
 	@Id
-	@Column(name = "ID")
+	@Column(name = "DEVICE_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "DEVICE_ID_GEN")
 	@SequenceGenerator(name = "DEVICE_ID_GEN", sequenceName = "DEVICE_ID_SEQ")
 	@XmlAttribute
@@ -198,7 +198,7 @@ public abstract class Device extends NetworkDevice {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "device_id", referencedColumnName = "id")
+	@JoinColumn(name = "device_id", referencedColumnName = "device_id")
 	@XmlTransient
 	public List<DeviceHistory> getHistory() {
 		return history;

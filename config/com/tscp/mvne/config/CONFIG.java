@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.tscp.mvna.ws.exception.InitializationException;
 
 public class CONFIG {
+	public static String clientName = "WOTG";
 	public static final String configFile = "com/tscp/mvne/config/config.properties";
 	public static final String connectionFile = "com/tscp/mvne/config/service.properties";
 	public static final String deviceFile = "com/tscp/mvne/config/device.properties";

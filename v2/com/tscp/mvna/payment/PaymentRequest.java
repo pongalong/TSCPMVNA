@@ -15,13 +15,19 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.hibernate.annotations.Type;
 import org.joda.money.Money;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
+import com.tscp.mvna.account.Account;
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.User;
@@ -29,16 +35,23 @@ import com.tscp.mvna.user.UserEntity;
 
 @Entity
 @Table(name = "PMT_REQUEST")
+@XmlRootElement
 public class PaymentRequest implements Serializable {
 	private static final long serialVersionUID = 2365845683459763290L;
-	private int transactionId;
-	private DateTime dateTime = new DateTime();
-	private DeviceAndService device;
-	private int accountNo;
-	private CreditCard creditCard;
-	private Money amount;
-	private UserEntity requestBy;
-	private PaymentResponse paymentResponse;
+	protected static final Logger logger = LoggerFactory.getLogger(PaymentRequest.class);
+
+	protected int transactionId;
+	protected int accountNo;
+	protected DateTime dateTime = new DateTime();
+	protected DeviceAndService device;
+	protected CreditCard creditCard;
+	protected Money amount;
+	protected UserEntity requestBy;
+	protected PaymentResponse paymentResponse;
+
+	/* **************************************************
+	 * Constructors
+	 */
 
 	public PaymentRequest() {
 		// do nothing
@@ -51,6 +64,10 @@ public class PaymentRequest implements Serializable {
 		amount = device.getTopup().getValue();
 		requestBy = device.getOwner();
 	}
+
+	/* **************************************************
+	 * Getters and Setters
+	 */
 
 	@Id
 	@Column(name = "TRANS_ID")
@@ -78,7 +95,6 @@ public class PaymentRequest implements Serializable {
 		this.dateTime = dateTime;
 	}
 
-	// TODO device already contains an account object. this object needs to be rethought
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "device_id")
 	public DeviceAndService getDevice() {
@@ -90,8 +106,6 @@ public class PaymentRequest implements Serializable {
 		this.device = device;
 	}
 
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "account_no", nullable = false)
 	@Column(name = "account_no")
 	public int getAccountNo() {
 		return accountNo;
@@ -136,6 +150,7 @@ public class PaymentRequest implements Serializable {
 	}
 
 	@OneToOne(mappedBy = "paymentRequest")
+	@XmlTransient
 	protected PaymentResponse getPaymentResponse() {
 		return paymentResponse;
 	}
@@ -145,9 +160,23 @@ public class PaymentRequest implements Serializable {
 		this.paymentResponse = paymentResponse;
 	}
 
+	/* **************************************************
+	 * Helper Methods
+	 */
+
+	@Transient
+	public Account getAccount() {
+		return device == null ? null : device.getAccount();
+	}
+
+	/* **************************************************
+	 * Debug Methods
+	 */
+
 	@Override
 	public String toString() {
-		return "PaymentRequest [transactionId=" + transactionId + ", dateTime=" + dateTime + ", account=" + accountNo + ", creditCard=" + creditCard + ", amount=" + amount + "]";
+		int deviceId = device != null ? device.getId() : null;
+		return "PaymentRequest [transactionId=" + transactionId + ", device=" + deviceId + ",  accountNo=" + accountNo + ", amount=" + amount + ", requestBy=" + requestBy + "]";
 	}
 
 }

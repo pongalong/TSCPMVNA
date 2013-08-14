@@ -7,6 +7,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.account.device.network.NetworkEsn;
 import com.tscp.mvna.account.device.network.NetworkInfo;
 import com.tscp.mvna.account.device.network.NetworkStatus;
 import com.tscp.mvna.account.device.network.exception.ConnectException;
@@ -25,6 +26,7 @@ import com.tscp.mvno.webservices.ApiPendingSubscriptionNPAResponseHolder;
 import com.tscp.mvno.webservices.ApiResellerSubInquiryResponseHolder;
 import com.tscp.mvno.webservices.PendingSubscriptionNPA;
 import com.tscp.mvno.webservices.Sali2;
+import com.tscp.util.profiler.GatewayResult;
 
 public class NetworkService extends NetworkGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(NetworkService.class);
@@ -47,6 +49,15 @@ public class NetworkService extends NetworkGateway {
 			List<AccessEqpAsgmInfo> accessEquipment, NetworkInfo networkInfo) {
 
 		AccessEqpAsgmInfo firstEquipment = accessEquipment.remove(0);
+
+		// sets ESN if querying by MDN only
+		if (networkInfo.getEsn() == null) {
+			try {
+				networkInfo.setEsn(new NetworkEsn(firstEquipment.getESNMEIDDcmlId()));
+			} catch (InvalidEsnException e) {
+				logger.warn("Invalid ESN received from query");
+			}
+		}
 
 		// matches first equipment in list
 		if (networkInfo.getEsn().equals(firstEquipment.getESNMEIDDcmlId())) {
@@ -89,14 +100,20 @@ public class NetworkService extends NetworkGateway {
 			String mdn) throws NetworkQueryException {
 		NetworkInfo networkInfo = new NetworkInfo();
 		networkInfo.setMdn(mdn = mdn == null ? mdn : mdn.trim());
-		return parseNetworkInfoResponse(port.apIresellerV2SubInquiry(null, mdn), networkInfo);
+
+		// ApiResellerSubInquiryResponseHolder response = port.apIresellerV2SubInquiry(null, mdn);
+		GatewayResult result = super.executeAndProfile("apIresellerV2SubInquiry", null, mdn);
+		return parseNetworkInfoResponse((ApiResellerSubInquiryResponseHolder) result.returnObject, networkInfo);
 	}
 
 	public NetworkInfo getNetworkInfoByEsn(
 			String esn) throws NetworkQueryException {
 		try {
 			NetworkInfo networkInfo = new NetworkInfo(esn = esn == null ? esn : esn.trim());
-			return parseNetworkInfoResponse(port.apIresellerV2SubInquiry(esn, null), networkInfo);
+
+			// ApiResellerSubInquiryResponseHolder response = port.apIresellerV2SubInquiry(esn, null);
+			GatewayResult result = super.executeAndProfile("apIresellerV2SubInquiry", esn, null);
+			return parseNetworkInfoResponse((ApiResellerSubInquiryResponseHolder) result.returnObject, networkInfo);
 		} catch (InvalidEsnException e) {
 			throw new NetworkQueryException("ESN " + esn + " is not valid");
 		}
@@ -120,7 +137,9 @@ public class NetworkService extends NetworkGateway {
 		pendingsubscription.setPricePlans(sali2);
 		pendingsubscription.setCSA(csa);
 
-		ApiPendingSubscriptionNPAResponseHolder response = port.apIreserveSubscriptionNPA(pendingsubscription);
+		// ApiPendingSubscriptionNPAResponseHolder response = port.apIreserveSubscriptionNPA(pendingsubscription);
+		GatewayResult result = super.executeAndProfile("apIreserveSubscriptionNPA", pendingsubscription);
+		ApiPendingSubscriptionNPAResponseHolder response = (ApiPendingSubscriptionNPAResponseHolder) result.returnObject;
 
 		if (response == null || response.getSubNPA() == null || response.getSubNPA().getMDN() == null || response.getSubNPA().getMSID() == null)
 			throw new ReserveException("No or incomplete response received");
@@ -156,7 +175,10 @@ public class NetworkService extends NetworkGateway {
 		activateReserveSubscription.setMDN(networkInfo.getMdn());
 		activateReserveSubscription.setMSID(networkInfo.getMsid());
 
-		ApiActivateReserveSubscriptionResponseHolder response = port.apIactivatePendingSubscription(activateReserveSubscription);
+		// ApiActivateReserveSubscriptionResponseHolder response =
+		// port.apIactivatePendingSubscription(activateReserveSubscription);
+		GatewayResult result = super.executeAndProfile("apIactivatePendingSubscription", activateReserveSubscription);
+		ApiActivateReserveSubscriptionResponseHolder response = (ApiActivateReserveSubscriptionResponseHolder) result.returnObject;
 
 		if (response == null)
 			throw new ConnectException("No response received");
@@ -178,7 +200,9 @@ public class NetworkService extends NetworkGateway {
 
 		logger.debug("Disconnecting {}", networkInfo);
 
-		ApiGeneralResponseHolder response = port.apIexpireSubscription(networkInfo.getMdn(), null);
+		// ApiGeneralResponseHolder response = port.apIexpireSubscription(networkInfo.getMdn(), null);
+		GatewayResult result = super.executeAndProfile("apIexpireSubscription", networkInfo.getMdn());
+		ApiGeneralResponseHolder response = (ApiGeneralResponseHolder) result.returnObject;
 
 		if (response == null)
 			throw new DisconnectException("No response resceived");
@@ -202,7 +226,9 @@ public class NetworkService extends NetworkGateway {
 
 		logger.debug("Restoring {}", networkInfo);
 
-		ApiGeneralResponseHolder response = port.apIrestoreSubscription(networkInfo.getMdn());
+		// ApiGeneralResponseHolder response = port.apIrestoreSubscription(networkInfo.getMdn());
+		GatewayResult result = super.executeAndProfile("apIrestoreSubscription", networkInfo.getMdn());
+		ApiGeneralResponseHolder response = (ApiGeneralResponseHolder) result.returnObject;
 
 		if (response == null)
 			throw new RestoreException("No response received");
@@ -227,8 +253,10 @@ public class NetworkService extends NetworkGateway {
 		logger.debug("Suspending {}", networkInfo);
 
 		// this value can be HTL to hotline but we're just going for full suspend.
-		String suspendcode = null;
-		ApiGeneralResponseHolder response = port.apIsuspendSubscription(networkInfo.getMdn(), suspendcode);
+		String suspendCode = null;
+		// ApiGeneralResponseHolder response = port.apIsuspendSubscription(networkInfo.getMdn(), suspendcode);
+		GatewayResult result = super.executeAndProfile("apIsuspendSubscription", networkInfo.getMdn(), suspendCode);
+		ApiGeneralResponseHolder response = (ApiGeneralResponseHolder) result.returnObject;
 
 		if (response == null)
 			throw new SuspendException("No response received");
@@ -239,4 +267,5 @@ public class NetworkService extends NetworkGateway {
 		networkInfo.setStale(true);
 		return networkInfo;
 	}
+
 }

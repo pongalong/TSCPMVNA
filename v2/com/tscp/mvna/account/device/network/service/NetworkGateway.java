@@ -1,5 +1,7 @@
 package com.tscp.mvna.account.device.network.service;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -16,12 +18,14 @@ import com.tscp.mvne.config.CONFIG;
 import com.tscp.mvne.config.CONNECTION;
 import com.tscp.mvno.webservices.API3;
 import com.tscp.mvno.webservices.API3Service;
+import com.tscp.util.profiler.GatewayResult;
+import com.tscp.util.profiler.Profiler;
 
 public abstract class NetworkGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(NetworkGateway.class);
-	protected static final API3Service service = loadService();
-	protected static final API3 port = service.getAPI3Port();
-	protected static int gatewaySessionCount;
+	private static final API3Service service = loadService();
+	private static final API3 port = service.getAPI3Port();
+	private static final Method[] portMethods = port.getClass().getMethods();
 
 	/**
 	 * Loads and returns the API3 Service.
@@ -29,11 +33,10 @@ public abstract class NetworkGateway {
 	 * @return
 	 */
 	protected static final API3Service loadService() throws InitializationException {
-		gatewaySessionCount++;
 		CONFIG.initAll();
 		try {
 			API3Service service = new API3Service(new URL(CONNECTION.networkWSDL), new QName(CONNECTION.networkNameSpace, CONNECTION.networkServiceName));
-			logger.info("NetworkGateway initialized to {} invoked {} times", service.getWSDLDocumentLocation(), gatewaySessionCount);
+			logger.info("NetworkGateway initialized to {}", service.getWSDLDocumentLocation());
 			return service;
 		} catch (MalformedURLException url_ex) {
 			logger.error("Exception initializing NetworkGateway at " + CONNECTION.networkWSDL, url_ex);
@@ -62,4 +65,43 @@ public abstract class NetworkGateway {
 		return service.getWSDLDocumentLocation();
 	}
 
+	/* **************************************************
+	 * Profiler and Remote Execution Methods
+	 */
+
+	protected static Profiler profiler = new Profiler();
+
+	public static Profiler getProfiler() {
+		return profiler;
+	}
+
+	protected static GatewayResult executeAndProfile(
+			String methodName, Object... params) {
+		return executeAndProfile(getMethod(methodName), params);
+	}
+
+	protected static GatewayResult executeAndProfile(
+			Method method, Object... params) {
+
+		profiler.start(method.getName());
+		GatewayResult result = null;
+
+		try {
+			result = new GatewayResult(method.getGenericReturnType(), method.invoke(port, params));
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			logger.error("Could not execute port method {} from {}", method.getName(), getUrl());
+		} finally {
+			profiler.stop();
+		}
+
+		return result;
+	}
+
+	protected static Method getMethod(
+			String name) {
+		for (Method method : portMethods)
+			if (method.getName().equals(name))
+				return method;
+		return null;
+	}
 }

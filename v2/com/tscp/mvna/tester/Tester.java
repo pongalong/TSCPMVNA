@@ -1,59 +1,74 @@
 package com.tscp.mvna.tester;
 
 import com.tscp.mvna.account.device.DeviceAndService;
-import com.tscp.mvna.account.kenan.exception.PaymentFetchException;
-import com.tscp.mvna.account.kenan.service.AccountService;
-import com.tscp.mvna.payment.PaymentHistory;
+import com.tscp.mvna.account.device.network.service.NetworkGateway;
+import com.tscp.mvna.dao.Dao;
+import com.tscp.mvna.payment.PaymentRecord;
 import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.PaymentResponse;
 import com.tscp.mvna.payment.PaymentTransaction;
 import com.tscp.mvna.payment.exception.PaymentGatewayException;
 import com.tscp.mvna.payment.exception.PaymentServiceException;
+import com.tscp.mvna.payment.service.PaymentGateway;
 import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvna.ws.TSCPMVNA2;
+import com.tscp.util.profiler.Profiler;
 
 public class Tester {
 
 	public static void main(
 			String[] args) {
 		try {
-			System.out.println("Hello world!");
-
-			TSCPMVNA2 port = new TSCPMVNA2();
-
-			DeviceAndService device = port.getDevice(24111);
-			System.out.println(device.getAccount());
-
-			try {
-				PaymentRequest request = PaymentService.submitRequest(device);
-				PaymentResponse response = PaymentService.submitPayment(request);
-
-				if (response.isSuccess()) {
-					System.out.println("PAYMENT SUCCESS!");
-					PaymentService.submitRecord(response);
-				} else {
-					System.err.println("PAYMENT FAILURE: " + response.getAuthorizationCode());
-				}
-
-			} catch (PaymentServiceException | PaymentGatewayException e) {
-				System.err.println("PaymentException caught: " + e.getMessage());
-			}
-
-			try {
-				PaymentHistory history = AccountService.getPaymentHistory(device.getAccountNo());
-				for (PaymentTransaction pt : history.getPayments()) {
-					System.out.println("found");
-				}
-			} catch (PaymentFetchException e) {
-				System.err.println("PaymentFetchException caught: " + e.getMessage());
-			}
-
+			System.out.println("Hello world!\n");
+			run();
 		} catch (Exception e) {
 			System.err.println("Global Exception caught: " + e.getMessage());
-			e.printStackTrace();
 		} finally {
-			System.out.println("Goodbye world!");
+			System.out.println("\nGoodbye world!");
+		}
+	}
+
+	public static void run() {
+		TSCPMVNA2 port = new TSCPMVNA2();
+
+		DeviceAndService device = port.getDevice(24111);
+
+		try {
+			device.getNetworkInfo();
+			device.suspend();
+			Thread.sleep(10000);
+			device.restore();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("NetworkException caught: " + e.getMessage());
 		}
 
+		try {
+
+			PaymentTransaction paymentTransaction = PaymentService.beginTransaction(device);
+			PaymentRequest request = PaymentService.submitRequest(paymentTransaction);
+			PaymentResponse response = PaymentService.submitPayment(paymentTransaction);
+			PaymentRecord record = PaymentService.submitRecord(paymentTransaction);
+
+			paymentTransaction = PaymentService.beginTransaction(device);
+			request = PaymentService.submitRequest(paymentTransaction);
+			response = PaymentService.submitPayment(paymentTransaction);
+			record = PaymentService.submitRecord(paymentTransaction);
+
+			System.out.println("* Payment Gateway Statistics*");
+			Profiler paymentProfiler = PaymentGateway.getProfiler();
+			System.out.println(paymentProfiler.getResultMap());
+
+			System.out.println("\n* Network Gateway Statistics*");
+			Profiler networkProfiler = NetworkGateway.getProfiler();
+			System.out.println(networkProfiler.getResultMap());
+
+			System.out.println("\n* DAO Statistics*");
+			Profiler daoProfiler = Dao.getProfiler();
+			System.out.println(daoProfiler.getResultMap());
+
+		} catch (PaymentServiceException | PaymentGatewayException e) {
+			System.err.println("PaymentException caught: " + e.getMessage());
+		}
 	}
 }

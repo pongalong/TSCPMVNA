@@ -3,6 +3,8 @@ package com.tscp.mvne.config;
 import com.tscp.mvna.ws.exception.InitializationException;
 
 public class BILLING extends CONFIG {
+	public static Integer externalIdType = 1;
+	
 	public static Integer accountCategory;
 
 	public static Integer tieCode;

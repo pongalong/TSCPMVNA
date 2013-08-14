@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
+import com.tscp.util.profiler.Profiler;
 
 public class Dao {
 	private static final Logger logger = LoggerFactory.getLogger(Dao.class);
@@ -59,7 +60,7 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
-			logger.debug("Loading object {} with ID {}", clazz.getSimpleName(), id);
+			logger.trace("Loading object {} with ID {}", clazz.getSimpleName(), id);
 
 			Object result = session.get(clazz, id);
 			tx.commit();
@@ -81,7 +82,7 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
-			logger.debug("Saving object {}.", obj);
+			logger.trace("Saving object {}.", obj);
 
 			session.save(obj);
 			tx.commit();
@@ -102,7 +103,7 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
-			logger.debug("Saving object {}.", obj);
+			logger.trace("Saving or updating object {}.", obj);
 
 			session.saveOrUpdate(obj);
 			tx.commit();
@@ -123,7 +124,7 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
-			logger.debug("Updating object {}.", obj);
+			logger.trace("Updating object {}.", obj);
 
 			session.update(obj);
 			tx.commit();
@@ -144,7 +145,7 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
-			logger.debug("Persisting object {}.", obj);
+			logger.trace("Persisting object {}.", obj);
 
 			session.persist(obj);
 			tx.commit();
@@ -165,6 +166,8 @@ public class Dao {
 			session = getSession();
 			Transaction tx = session.beginTransaction();
 
+			profiler.start(namedQuery);
+
 			Query query = session.getNamedQuery(namedQuery);
 			String[] parameters = query.getNamedParameters();
 
@@ -177,9 +180,9 @@ public class Dao {
 			Collections.sort(sortedParameters);
 
 			// TODO check number of parameters match
-			logger.debug("Executing namedQuery {}", namedQuery);
+			logger.trace("Executing namedQuery {}", namedQuery);
 			for (int i = 0; i < args.length; i++) {
-				// logger.debug("Parameter {} set to {}", sortedParameters.get(i), args[i]);
+				// logger.debug("... Parameter {}={}", sortedParameters.get(i), args[i]);
 				query.setParameter(sortedParameters.get(i), args[i]);
 			}
 
@@ -193,8 +196,19 @@ public class Dao {
 			return null;
 		} finally {
 			closeSession(session);
+			profiler.stop();
 		}
 
+	}
+
+	/* **************************************************
+	 * Profiler Methods
+	 */
+
+	protected static Profiler profiler = new Profiler();
+
+	public static Profiler getProfiler() {
+		return profiler;
 	}
 
 }

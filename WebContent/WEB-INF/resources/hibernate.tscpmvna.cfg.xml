@@ -37,19 +37,22 @@
     <mapping class="com.tscp.mvna.user.UserEntity" />
     <mapping class="com.tscp.mvna.user.User" />
     <mapping class="com.tscp.mvna.user.Customer" />
+
     <mapping class="com.tscp.mvna.account.Account" />
     <mapping class="com.tscp.mvna.account.UnlinkedAccount" />
+
     <mapping class="com.tscp.mvna.account.device.Device" />
     <mapping class="com.tscp.mvna.account.device.DeviceAndService" />
     <mapping class="com.tscp.mvna.account.device.DeviceHistory" />
     <mapping class="com.tscp.mvna.account.device.Topup" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
+
     <mapping class="com.tscp.mvna.payment.PaymentRequest" />
     <mapping class="com.tscp.mvna.payment.PaymentResponse" />
-    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponseEntity" />
-    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponse" />
+    <mapping class="com.tscp.mvna.payment.PaymentRecord" />
     <mapping class="com.tscp.mvna.payment.method.CreditCard" />
     <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
+    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponse" />
 
     <!-- mappings for stored procedures -->
     <mapping resource="hibernate.tscpmvna.queries.xml" />

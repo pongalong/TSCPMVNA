@@ -3,8 +3,6 @@ package com.tscp.mvna.account.kenan.service;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -233,35 +231,24 @@ public class AccountService extends KenanGatewayService {
 	}
 
 	public static PaymentRecord addPayment(
-			PaymentResponse paymentResponse) throws AccountUpdateException {
-		PaymentRequest paymentRequest = paymentResponse.getPaymentRequest();
-
-		logger.debug("recording to account {}", paymentRequest);
-		ServiceInstance serviceInstance = paymentRequest.getDevice().getService().getActiveServiceInstance();
-		logger.debug("recording to {}", serviceInstance);
+			PaymentRequest paymentRequest, PaymentResponse paymentResponse) throws AccountUpdateException {
 
 		String amount = PaymentService.stringFormatter.print(paymentRequest.getAmount()).replace(".", "");
 		String accountNo = Integer.toString(paymentRequest.getAccountNo());
-		// XMLGregorianCalendar transDate = DateUtils.getXMLCalendar(paymentResponse.getResponseDate());
-		XMLGregorianCalendar transDate = DateUtils.getXMLCalendar();
+		DateTime recordDate = new DateTime();
 
 		// TODO set clientName as a property in configuration files;
 		try {
-			// logger.debug("Params: {}, {}, {}, {}, {}, {}, {}", USERNAME, serviceInstance.getExternalId(), 1, amount,
-			// transDate, BILLING.paymentTransType, "tcweb");
-			// checkResponse(port.addPayment(USERNAME, serviceInstance.getExternalId(), 1, amount, transDate,
-			// BILLING.paymentTransType, CONFIG.clientName));
-
-			logger.debug("Params: {}, {}, {}, {}, {}, {}, {}", USERNAME, accountNo, 1, amount, transDate, BILLING.paymentTransType, "tcweb");
-			checkResponse(port.addPayment(USERNAME, accountNo, 1, amount, transDate, BILLING.paymentTransType, CONFIG.clientName));
+			checkResponse(port.addPayment(USERNAME, accountNo, BILLING.externalIdType, amount, DateUtils.getXMLCalendar(recordDate), BILLING.paymentTransType, CONFIG.clientName));
 
 			// TODO get the new tracking ID from paymentHistory and record the seviceInstance/device the payment was for
-			PaymentRecord paymentRecord = new PaymentRecord();
+			PaymentRecord paymentRecord = new PaymentRecord(paymentResponse);
+			paymentRecord.setRecordDate(recordDate);
+			paymentRecord.setTrackingId(0);
 			return paymentRecord;
 		} catch (KenanException e) {
 			throw new AccountUpdateException("Unable to add payment of " + amount + " to Account " + paymentRequest.getAccountNo(), e);
 		}
-
 	}
 
 	public Account getUnlinkedAccount(

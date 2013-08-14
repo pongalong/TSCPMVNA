@@ -13,21 +13,49 @@ import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.payment.exception.PaymentGatewayException;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.UserEntity;
+import com.tscp.util.profiler.Profiler;
 
 public class PaymentGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 	private static final MoneyFormatter gatewayCurrencyFormatter = new MoneyFormatterBuilder().appendAmount(MoneyAmountStyle.LOCALIZED_NO_GROUPING).toFormatter();
 
-	protected static PaymentGatewayResponseEntity submitPayment(
+	protected static PaymentGatewayResponse submitPayment(
 			UserEntity requester, CreditCard creditCard, Money amount) throws PaymentGatewayException {
 
+		profiler.start();
 		@SuppressWarnings("unchecked")
-		List<PaymentGatewayResponseEntity> result = Dao.executeNamedQuery("submit_payment", requester.getId(), creditCard.getId(), gatewayCurrencyFormatter.print(amount));
+		List<PaymentGatewayResponse> results = Dao.executeNamedQuery("submit_payment", requester.getId(), creditCard.getId(), gatewayCurrencyFormatter.print(amount));
 
-		if (result == null || result.isEmpty())
+		if (results == null || results.isEmpty())
 			throw new PaymentGatewayException("No response received");
+
+		PaymentGatewayResponse result = results.get(0);
+
+		stopProfiling(result);
+		return result;
+	}
+
+	/* **************************************************
+	 * Profiler Methods
+	 */
+
+	private static Profiler profiler = new Profiler();
+
+	public static Profiler getProfiler() {
+		return profiler;
+	}
+
+	private static void stopProfiling(
+			PaymentGatewayResponse response) {
+
+		String key;
+
+		if (response.isSuccess())
+			key = "SUCCESS";
 		else
-			return result.get(0);
+			key = response.getAuthorizationCode() != null ? response.getAuthorizationCode() : response.getConfirmationMsg();
+
+		profiler.stop(key);
 	}
 
 }

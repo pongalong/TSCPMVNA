@@ -101,12 +101,14 @@ public class Service implements KenanObject {
 		newServiceComponent.setExternalId(newServiceInstance.getExternalId());
 		newServiceComponent.setServicePackage(newServicePackage);
 		newServiceComponent = ProvisionServiceComponentService.addInitialComponent(newServiceComponent);
+		refresh();
 	}
 
 	@XmlTransient
 	public void disconnect() throws ServiceIntegrityException, ServiceDisconnectException, ProvisionException {
 		sanityCheck();
 		ProvisionServiceInstanceService.removeServiceInstance(account, getActiveServiceInstance());
+		refresh();
 	}
 
 	/**
@@ -129,6 +131,7 @@ public class Service implements KenanObject {
 
 		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent());
 		ProvisionServiceComponentService.addComponent(restoreComponent);
+		refreshServiceComponents();
 	}
 
 	/**
@@ -149,6 +152,7 @@ public class Service implements KenanObject {
 
 		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent());
 		ProvisionServiceComponentService.addFutureComponent(new SuspendComponent(getActiveServiceComponent()));
+		refreshServiceComponents();
 	}
 
 	/* **************************************************
@@ -178,12 +182,24 @@ public class Service implements KenanObject {
 
 	@Override
 	public void refresh() {
-		loadedServiceInstances = false;
-		loadedServicePackages = false;
+		refreshServiceInstances();
+		refreshServicePackages();
+		refreshServiceComponents();
+	}
+
+	protected void refreshServiceComponents() {
 		loadedServiceComponents = false;
-		// serviceInstances = loadServiceInstances();
-		// servicePackages = loadServicePackages();
-		// serviceComponents = loadServiceComponents();
+		serviceComponents = null;
+	}
+
+	protected void refreshServiceInstances() {
+		loadedServiceInstances = false;
+		serviceInstances = null;
+	}
+
+	protected void refreshServicePackages() {
+		loadedServicePackages = false;
+		servicePackages = null;
 	}
 
 	protected List<ServiceComponent> loadServiceComponents() {
@@ -343,9 +359,13 @@ public class Service implements KenanObject {
 		return serviceInstances != null && !serviceInstances.isEmpty();
 	}
 
+	/* **************************************************
+	 * Debug Methods
+	 */
+
 	@Override
 	public String toString() {
-		return "Service [account=" + account + "]";
+		return "Service [account=" + account.getAccountNo() + ", serviceInstances=" + getActiveServiceInstance().getExternalId() + ", serviceComponents=" + getActiveServiceComponent().getName() + "]";
 	}
 
 }

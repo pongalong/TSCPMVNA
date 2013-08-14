@@ -1,5 +1,7 @@
 package com.tscp.mvna.payment;
 
+import java.io.Serializable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,17 +26,19 @@ import org.slf4j.LoggerFactory;
 
 import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 import com.tscp.mvna.payment.exception.PaymentGatewayException;
-import com.tscp.mvna.payment.service.PaymentGatewayResponseEntity;
+import com.tscp.mvna.payment.service.PaymentGatewayResponse;
 
 @Entity
 @Table(name = "PMT_RESPONSE")
 @XmlRootElement
-public class PaymentResponse extends PaymentGatewayResponseEntity {
-	protected static final Logger logger = LoggerFactory.getLogger(PaymentResponse.class);
+public class PaymentResponse implements Serializable {
 	private static final long serialVersionUID = -7797401339183331832L;
-	protected PaymentRequest paymentRequest;
+	protected static final Logger logger = LoggerFactory.getLogger(PaymentResponse.class);
+
 	protected int transactionId;
 	protected DateTime responseDate = new DateTime();
+	protected PaymentRequest paymentRequest;
+	protected PaymentRecord paymentRecord;
 
 	/* **************************************************
 	 * Constructors
@@ -51,18 +55,6 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 	/* **************************************************
 	 * Getters and Setters
 	 */
-
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	@PrimaryKeyJoinColumn
-	@XmlTransient
-	public PaymentRequest getPaymentRequest() {
-		return paymentRequest;
-	}
-
-	protected void setPaymentRequest(
-			PaymentRequest paymentRequest) {
-		this.paymentRequest = paymentRequest;
-	}
 
 	@GenericGenerator(name = "generator", strategy = "foreign", parameters = @Parameter(name = "property", value = "paymentRequest"))
 	@Id
@@ -93,7 +85,7 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 	@Column(name = "SUCCESS")
 	@Type(type = "yes_no")
 	public boolean isSuccess() {
-		return confirmationCode != null && confirmationCode.equalsIgnoreCase(SUCCESSFUL_TRANSACTION);
+		return confirmationCode != null && confirmationCode.equalsIgnoreCase(PaymentGatewayResponse.SUCCESSFUL_TRANSACTION);
 	}
 
 	protected void setSuccess(
@@ -101,16 +93,94 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 		// do nothing. Success is based on the confirmation code.
 	}
 
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@PrimaryKeyJoinColumn
+	@XmlTransient
+	protected PaymentRequest getPaymentRequest() {
+		return paymentRequest;
+	}
+
+	protected void setPaymentRequest(
+			PaymentRequest paymentRequest) {
+		this.paymentRequest = paymentRequest;
+	}
+
+	@OneToOne(mappedBy = "paymentResponse")
+	@XmlTransient
+	protected PaymentRecord getPaymentRecord() {
+		return paymentRecord;
+	}
+
+	protected void setPaymentRecord(
+			PaymentRecord paymentRecord) {
+		this.paymentRecord = paymentRecord;
+	}
+
 	/* **************************************************
 	 * Adaptor Methods for PaymentGateway Objects
 	 */
 
+	protected int gatewayTransactionId;
+	protected String confirmationCode;
+	protected String confirmationMsg;
+	protected String authorizationCode;
+	protected String cvvCode;
+
+	@Column(name = "GATEWAY_TRANS_ID")
+	public int getGatewayTransactionId() {
+		return gatewayTransactionId;
+	}
+
+	public void setGatewayTransactionId(
+			int gatewayTransactionId) {
+		this.gatewayTransactionId = gatewayTransactionId;
+	}
+
+	@Column(name = "CONF_CODE")
+	public String getConfirmationCode() {
+		return confirmationCode;
+	}
+
+	public void setConfirmationCode(
+			String confirmationCode) {
+		this.confirmationCode = confirmationCode;
+	}
+
+	@Column(name = "CONF_MSG")
+	public String getConfirmationMsg() {
+		return confirmationMsg;
+	}
+
+	public void setConfirmationMsg(
+			String confirmationMsg) {
+		this.confirmationMsg = confirmationMsg;
+	}
+
+	@Column(name = "AUTH_CODE")
+	public String getAuthorizationCode() {
+		return authorizationCode;
+	}
+
+	public void setAuthorizationCode(
+			String authorizationCode) {
+		this.authorizationCode = authorizationCode;
+	}
+
+	@Column(name = "CVV_CODE")
+	public String getCvvCode() {
+		return cvvCode;
+	}
+
+	public void setCvvCode(
+			String cvvCode) {
+		this.cvvCode = cvvCode;
+	}
+
 	public void parseGatewayResponse(
-			PaymentGatewayResponseEntity response) {
+			PaymentGatewayResponse response) {
 
 		if (paymentRequest == null)
 			throw new PaymentGatewayException(this.getClass().getSimpleName() + " does not contain a PaymentRequest and is not a valid response");
-
 		if (response == null)
 			throw new PaymentGatewayException("Cannot parse null response");
 
@@ -119,7 +189,6 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 		confirmationMsg = response.getConfirmationMsg();
 		cvvCode = response.getCvvCode();
 		gatewayTransactionId = response.getGatewayTransactionId();
-
 	}
 
 	/* **************************************************
@@ -128,7 +197,7 @@ public class PaymentResponse extends PaymentGatewayResponseEntity {
 
 	@Override
 	public String toString() {
-		return "PaymentResponse [transactionId=" + transactionId + ", responseDate=" + responseDate + ", gatewayTransactionId=" + gatewayTransactionId + ", success=" + isSuccess() + "]";
+		return "PaymentResponse [transactionId=" + transactionId + ", gatewayTransactionId=" + gatewayTransactionId + ", authCode=" + authorizationCode + ", success=" + isSuccess() + "]";
 	}
 
 }

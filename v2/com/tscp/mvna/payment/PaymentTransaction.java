@@ -2,15 +2,22 @@ package com.tscp.mvna.payment;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.telscape.billingserviceinterface.Payment;
 import com.tscp.util.ClassUtils;
 
+@XmlRootElement
 public class PaymentTransaction implements Serializable {
 	private static final long serialVersionUID = 23273165232351086L;
 	private int transactionId;
 	private PaymentRequest request;
 	private PaymentResponse response;
 	private PaymentRecord record;
+
+	public PaymentTransaction() {
+		// do nothing
+	}
 
 	public PaymentTransaction(Payment payment) {
 		payment.getPaymentTypeDesc();

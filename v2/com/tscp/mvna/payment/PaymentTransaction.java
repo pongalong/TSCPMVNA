@@ -4,10 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -20,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.Payment;
 import com.tscp.mvna.payment.service.PaymentService;
-import com.tscp.mvna.user.User;
-import com.tscp.mvna.user.UserEntity;
 
 @Entity
 @Table(name = "PMT_TRANS_MAP")
@@ -30,7 +25,6 @@ public class PaymentTransaction implements Serializable {
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentTransaction.class);
 	private static final long serialVersionUID = 23273165232351086L;
 	private int transactionId;
-	private UserEntity requestBy;
 	private PaymentRequest paymentRequest;
 	private PaymentResponse paymentResponse;
 	private PaymentRecord paymentRecord;
@@ -60,17 +54,6 @@ public class PaymentTransaction implements Serializable {
 	public void setTransactionId(
 			int transactionId) {
 		this.transactionId = transactionId;
-	}
-
-	@ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
-	@JoinColumn(name = "REQUESTER_ID", nullable = false)
-	public UserEntity getRequestBy() {
-		return requestBy;
-	}
-
-	public void setRequestBy(
-			UserEntity requestBy) {
-		this.requestBy = requestBy;
 	}
 
 	@OneToOne

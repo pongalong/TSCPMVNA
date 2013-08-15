@@ -1,7 +1,5 @@
 package com.tscp.mvna.payment.service;
 
-import java.util.List;
-
 import org.joda.money.Money;
 import org.joda.money.format.MoneyAmountStyle;
 import org.joda.money.format.MoneyFormatter;
@@ -19,18 +17,27 @@ public class PaymentGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 	private static final MoneyFormatter gatewayCurrencyFormatter = new MoneyFormatterBuilder().appendAmount(MoneyAmountStyle.LOCALIZED_NO_GROUPING).toFormatter();
 
-	protected static PaymentGatewayResponse submitPayment(
+	/*
+	 * This method returns a Hibernate Entity made specifically for this query, resulting in larger overhead. Using
+	 * submitPayment which uses scalars returns and Object[]
+	 * 
+	 * @Deprecated protected static PaymentGatewayResponse submitPayment_Entity( UserEntity requester, CreditCard
+	 * creditCard, Money amount) throws PaymentGatewayException { profiler.start();
+	 * 
+	 * @SuppressWarnings("unchecked") List<PaymentGatewayResponse> results = Dao.executeNamedQuery("submit_payment",
+	 * requester.getId(), creditCard.getId(), gatewayCurrencyFormatter.print(amount)); if (results == null ||
+	 * results.isEmpty()) throw new PaymentGatewayException("No response received"); PaymentGatewayResponse result =
+	 * results.get(0); stopProfiling(result); return result; }
+	 * 
+	 * private static void stopProfiling( PaymentGatewayResponse response) { String key; if (response.isSuccess()) key =
+	 * "SUCCESS"; else key = response.getAuthorizationCode() != null ? response.getAuthorizationCode() :
+	 * response.getConfirmationMsg(); profiler.stop(key); }
+	 */
+
+	protected static Object[] submitPayment(
 			UserEntity requester, CreditCard creditCard, Money amount) throws PaymentGatewayException {
-
 		profiler.start();
-		@SuppressWarnings("unchecked")
-		List<PaymentGatewayResponse> results = Dao.executeNamedQuery("submit_payment", requester.getId(), creditCard.getId(), gatewayCurrencyFormatter.print(amount));
-
-		if (results == null || results.isEmpty())
-			throw new PaymentGatewayException("No response received");
-
-		PaymentGatewayResponse result = results.get(0);
-
+		Object[] result = Dao.listScalar("submit_payment", requester.getId(), creditCard.getId(), gatewayCurrencyFormatter.print(amount));
 		stopProfiling(result);
 		return result;
 	}
@@ -45,15 +52,14 @@ public class PaymentGateway {
 		return profiler;
 	}
 
-	private static void stopProfiling(
-			PaymentGatewayResponse response) {
-
+	public static void stopProfiling(
+			Object[] response) {
 		String key;
 
-		if (response.isSuccess())
+		if (((String) response[1]).equals("0"))
 			key = "SUCCESS";
 		else
-			key = response.getAuthorizationCode() != null ? response.getAuthorizationCode() : response.getConfirmationMsg();
+			key = (String) (response[3] != null ? response[3] : response[2]);
 
 		profiler.stop(key);
 	}

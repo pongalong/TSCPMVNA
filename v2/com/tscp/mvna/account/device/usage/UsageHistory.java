@@ -81,7 +81,7 @@ public class UsageHistory implements KenanObject, TimeSensitive {
 	@Override
 	public void refresh() {
 		try {
-			usageSessions = Dao.executeNamedQuery("fetch_usage_history", serviceInstance.getAccount().getAccountNo(), serviceInstance.getExternalId());
+			usageSessions = Dao.list("fetch_usage_history", serviceInstance.getAccount().getAccountNo(), serviceInstance.getExternalId());
 		} catch (Exception e) {
 			logger.error("Error fetching usage history for {}", serviceInstance, e);
 		} finally {

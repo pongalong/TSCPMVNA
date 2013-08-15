@@ -1,8 +1,6 @@
 package com.tscp.mvna.dao;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -55,10 +53,11 @@ public class Dao {
 			@SuppressWarnings("rawtypes") Class clazz, Serializable id) {
 
 		Session session = null;
+		Transaction tx = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
 			logger.trace("Loading object {} with ID {}", clazz.getSimpleName(), id);
 
@@ -67,6 +66,7 @@ public class Dao {
 			return result;
 		} catch (HibernateException e) {
 			logger.error("Error loading object {} with ID {}.", clazz.getSimpleName(), id, e);
+			tx.rollback();
 			return null;
 		} finally {
 			closeSession(session);
@@ -77,10 +77,11 @@ public class Dao {
 			Object obj) throws HibernateException {
 
 		Session session = null;
+		Transaction tx = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
 			logger.trace("Saving object {}.", obj);
 
@@ -88,6 +89,7 @@ public class Dao {
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error saving object {}.", obj, e);
+			tx.rollback();
 			throw e;
 		} finally {
 			closeSession(session);
@@ -98,10 +100,11 @@ public class Dao {
 			Object obj) throws HibernateException {
 
 		Session session = null;
+		Transaction tx = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
 			logger.trace("Saving or updating object {}.", obj);
 
@@ -109,6 +112,7 @@ public class Dao {
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error saving object {}.", obj, e);
+			tx.rollback();
 			throw e;
 		} finally {
 			closeSession(session);
@@ -119,10 +123,11 @@ public class Dao {
 			Object obj) throws HibernateException {
 
 		Session session = null;
+		Transaction tx = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
 			logger.trace("Updating object {}.", obj);
 
@@ -130,6 +135,7 @@ public class Dao {
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error updating object {}.", obj, e);
+			tx.rollback();
 			throw e;
 		} finally {
 			closeSession(session);
@@ -140,10 +146,11 @@ public class Dao {
 			Object obj) {
 
 		Session session = null;
+		Transaction tx = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
 			logger.trace("Persisting object {}.", obj);
 
@@ -151,54 +158,116 @@ public class Dao {
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error persisting object {}.", obj, e);
+			tx.rollback();
 		} finally {
 			closeSession(session);
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	public static List executeNamedQuery(
-			String namedQuery, Object... args) {
+	public static List fetch(
+			String hqlString, Object... args) {
 
 		Session session = null;
+		Transaction tx = null;
+		List result = null;
 
 		try {
 			session = getSession();
-			Transaction tx = session.beginTransaction();
+			tx = session.beginTransaction();
 
-			profiler.start(namedQuery);
-
-			Query query = session.getNamedQuery(namedQuery);
-			String[] parameters = query.getNamedParameters();
-
-			if (args.length != parameters.length)
-				throw new HibernateException("Number of arguments does not match number of parameters");
-
-			List<String> sortedParameters = new ArrayList<String>();
-			for (String p : parameters)
-				sortedParameters.add(p);
-			Collections.sort(sortedParameters);
-
-			// TODO check number of parameters match
-			logger.trace("Executing namedQuery {}", namedQuery);
+			profiler.start(hqlString);
+			Query query = session.createQuery(hqlString);
 			for (int i = 0; i < args.length; i++) {
-				// logger.debug("... Parameter {}={}", sortedParameters.get(i), args[i]);
-				query.setParameter(sortedParameters.get(i), args[i]);
+				query.setParameter(i, args[i]);
+				logger.debug("set param {} to {}", i, args[i]);
 			}
 
-			List result = query.list();
+			logger.debug("Executing HQL {}", query.getQueryString());
 
 			tx.commit();
-			return result;
+			result = query.list();
 		} catch (HibernateException e) {
-			logger.error("Error executing named query {}: {} : {}", namedQuery, e.getMessage(), e.getCause());
-			e.printStackTrace();
-			return null;
+			logger.error("Error executing {}", hqlString, e);
+			tx.rollback();
 		} finally {
 			closeSession(session);
 			profiler.stop();
 		}
 
+		return result;
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static List list(
+			String queryName, Object... args) {
+
+		Session session = getSession();
+		Transaction tx = session.beginTransaction();
+
+		PreparedQuery preparedQuery = new PreparedQuery(session.getNamedQuery(queryName), args);
+		List result = null;
+
+		try {
+			profiler.start(queryName);
+			result = preparedQuery.list();
+			tx.commit();
+		} catch (HibernateException e) {
+			logger.error("Error executing named query {}: {} : {}", queryName, e.getMessage(), e.getCause());
+			tx.rollback();
+		} finally {
+			closeSession(session);
+			profiler.stop();
+		}
+
+		return result;
+	}
+
+	public static Object uniqueResultScalar(
+			String queryName, Object... args) {
+
+		Session session = getSession();
+		Transaction tx = session.beginTransaction();
+
+		PreparedQuery preparedQuery = new PreparedQuery(session.getNamedQuery(queryName), args);
+		Object result = null;
+
+		try {
+			profiler.start(queryName);
+			result = preparedQuery.uniqueResult();
+			tx.commit();
+		} catch (HibernateException e) {
+			logger.error("Error executing named query {}: {} : {}", queryName, e.getMessage(), e.getCause());
+			tx.rollback();
+		} finally {
+			closeSession(session);
+			profiler.stop();
+		}
+
+		return result;
+	}
+
+	public static Object[] listScalar(
+			String queryName, Object... args) {
+
+		Session session = getSession();
+		Transaction tx = session.beginTransaction();
+
+		PreparedQuery preparedQuery = new PreparedQuery(session.getNamedQuery(queryName), args);
+		Object[] result = null;
+
+		try {
+			profiler.start(queryName);
+			result = (Object[]) preparedQuery.uniqueResult();
+			tx.commit();
+		} catch (HibernateException e) {
+			logger.error("Error executing named query {}: {} : {}", queryName, e.getMessage(), e.getCause());
+			tx.rollback();
+		} finally {
+			closeSession(session);
+			profiler.stop();
+		}
+
+		return result;
 	}
 
 	/* **************************************************

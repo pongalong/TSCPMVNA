@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
+@Deprecated
 @Entity
 public class PaymentGatewayResponse implements PaymentGatewayObject, Serializable {
 	private static final long serialVersionUID = -7428346015795926109L;

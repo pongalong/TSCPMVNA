@@ -83,13 +83,13 @@ public class TSCPMVNA2 {
 	@WebMethod
 	public UsageHistory getUsageHistoryById(
 			int accountNo, String externalId) {
-		return new UsageHistory(Dao.executeNamedQuery("fetch_usage_history", accountNo, externalId));
+		return new UsageHistory(Dao.list("fetch_usage_history", accountNo, externalId));
 	}
 
 	@WebMethod
 	public List<UnlinkedAccount> getUnlinkedAccounts(
 			int custId) {
-		return Dao.executeNamedQuery("fetch_unlinked_account", custId);
+		return Dao.list("fetch_unlinked_account", custId);
 	}
 
 	/* **************************************************

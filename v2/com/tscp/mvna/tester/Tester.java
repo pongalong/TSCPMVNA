@@ -2,11 +2,12 @@ package com.tscp.mvna.tester;
 
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.account.device.network.service.NetworkGateway;
+import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
-import com.tscp.mvna.payment.PaymentTransaction;
+import com.tscp.mvna.payment.PaymentHistory;
+import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.service.PaymentGateway;
 import com.tscp.mvna.ws.TSCPMVNA2;
-import com.tscp.util.profiler.Profiler;
 
 public class Tester {
 
@@ -28,30 +29,31 @@ public class Tester {
 		DeviceAndService device = port.getDevice(24111);
 
 		try {
-			// PaymentTransaction paymentTransaction = PaymentService.beginTransaction(device);
-			// PaymentRequest request = PaymentService.submitRequest(paymentTransaction);
-			// PaymentResponse response = PaymentService.submitPayment(paymentTransaction);
-			// PaymentRecord record = PaymentService.submitRecord(paymentTransaction);
 
-			// PaymentHistory paymentHistory = AccountService.getPaymentHistory(device.getAccountNo());
-			// for (PaymentTransaction pt : paymentHistory.getPayments())
-			// System.out.println(pt);
+			PaymentHistory paymentHistory = AccountService.getPaymentHistory(device.getAccountNo());
 
-			PaymentTransaction pt = (PaymentTransaction) Dao.get(PaymentTransaction.class, 69068);
-			System.out.println(pt);
+			for (PaymentRequest pr : paymentHistory.getPaymentRequests()) {
+				if (pr.getPaymentResponse() != null) {
+					System.out.println(pr);
+					System.out.println("    " + pr.getPaymentResponse());
+					if (pr.getPaymentResponse().getPaymentRecord() != null)
+						System.out.println("        " + pr.getPaymentResponse().getPaymentRecord());
+				}
+			}
 
 		} catch (Exception e) {
-			System.err.println("PaymentException caught: " + e.getMessage());
+			e.printStackTrace();
 		} finally {
-			System.out.println("* Payment Gateway Statistics*");
-			Profiler paymentProfiler = PaymentGateway.getProfiler();
-			System.out.println(paymentProfiler.getResultMap());
-			System.out.println("\n* Network Gateway Statistics*");
-			Profiler networkProfiler = NetworkGateway.getProfiler();
-			System.out.println(networkProfiler.getResultMap());
-			System.out.println("\n* DAO Statistics*");
-			Profiler daoProfiler = Dao.getProfiler();
-			System.out.println(daoProfiler.getResultMap());
+			printStatistics();
 		}
+	}
+
+	public static void printStatistics() {
+		System.out.println("***Payment Gateway Statistics***");
+		System.out.println(PaymentGateway.getProfiler().getResultMap());
+		System.out.println("***Network Gateway Statistics***");
+		System.out.println(NetworkGateway.getProfiler().getResultMap());
+		System.out.println("***DAO Statistics***");
+		System.out.println(Dao.getProfiler().getResultMap());
 	}
 }

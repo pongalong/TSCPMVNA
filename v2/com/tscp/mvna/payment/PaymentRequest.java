@@ -31,6 +31,8 @@ import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 import com.tscp.mvna.account.Account;
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.payment.method.CreditCard;
+import com.tscp.mvna.user.User;
+import com.tscp.mvna.user.UserEntity;
 
 @Entity
 @Table(name = "PMT_REQUEST")
@@ -39,7 +41,7 @@ import com.tscp.mvna.payment.method.CreditCard;
 public class PaymentRequest implements Serializable {
 	private static final long serialVersionUID = 2365845683459763290L;
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentRequest.class);
-	// protected UserEntity requestBy;
+	protected UserEntity requestBy;
 	protected int transactionId;
 	protected int accountNo;
 	protected DateTime dateTime = new DateTime();
@@ -53,7 +55,7 @@ public class PaymentRequest implements Serializable {
 	 * Constructors
 	 */
 
-	public PaymentRequest() {
+	protected PaymentRequest() {
 		// do nothing
 	}
 
@@ -62,7 +64,7 @@ public class PaymentRequest implements Serializable {
 		accountNo = device.getAccount().getAccountNo();
 		creditCard = device.getPaymentMethod();
 		amount = device.getTopup().getValue();
-		// requestBy = device.getOwner();
+		requestBy = device.getOwner();
 	}
 
 	/* **************************************************
@@ -138,28 +140,26 @@ public class PaymentRequest implements Serializable {
 		this.amount = amount;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
+	@JoinColumn(name = "REQUESTER_ID", nullable = false)
+	public UserEntity getRequestBy() {
+		return requestBy;
+	}
+
+	public void setRequestBy(
+			UserEntity requestBy) {
+		this.requestBy = requestBy;
+	}
+
 	@OneToOne(mappedBy = "paymentRequest")
 	@XmlTransient
-	protected PaymentResponse getPaymentResponse() {
+	public PaymentResponse getPaymentResponse() {
 		return paymentResponse;
 	}
 
 	protected void setPaymentResponse(
 			PaymentResponse paymentResponse) {
 		this.paymentResponse = paymentResponse;
-	}
-
-	protected PaymentTransaction paymentTransaction;
-
-	@OneToOne(mappedBy = "paymentRequest")
-	@XmlTransient
-	public PaymentTransaction getPaymentTransaction() {
-		return paymentTransaction;
-	}
-
-	public void setPaymentTransaction(
-			PaymentTransaction paymentTransaction) {
-		this.paymentTransaction = paymentTransaction;
 	}
 
 	/* **************************************************

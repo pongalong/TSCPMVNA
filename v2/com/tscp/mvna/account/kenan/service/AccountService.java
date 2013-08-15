@@ -41,7 +41,6 @@ import com.tscp.mvna.payment.PaymentHistory;
 import com.tscp.mvna.payment.PaymentRecord;
 import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.PaymentResponse;
-import com.tscp.mvna.payment.PaymentTransaction;
 import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
@@ -221,20 +220,47 @@ public class AccountService extends KenanGatewayService {
 			throw new PaymentFetchException("No account number specified");
 
 		try {
-
 			// List<PaymentHolder> response = checkResponse(port.getCompletePaymentHistory(USERNAME,
 			// Integer.toString(accountNo)));
 			// PaymentHistory paymentHistory = new PaymentHistory(response);
-			List<PaymentTransaction> asdf = Dao.executeNamedQuery("fetch_payment_history", accountNo);
-			PaymentHistory paymentHistory = new PaymentHistory();
-			paymentHistory.setPayments(asdf);
-			return paymentHistory;
+
+			// List<PaymentTransaction> asdf = Dao.list("fetch_payment_history", accountNo);
+			List<PaymentRequest> requests = Dao.fetch("from PaymentRequest where accountNo = ? order by transactionId desc", accountNo);
+			return new PaymentHistory(requests);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new PaymentFetchException("Unable to fetch PaymentHistory for Account " + accountNo, e);
 		}
 	}
 
+	// TODO verify that this stored procedure is actually inserting payments into kenan properly
+	public static PaymentRecord addPayment_sp(
+			PaymentResponse paymentResponse) throws AccountUpdateException {
+
+		PaymentRecord paymentRecord = new PaymentRecord(paymentResponse);
+		paymentRecord.setRecordDate(new DateTime());
+
+		logger.debug("paymentResponse has a request object with account_NO {}", paymentResponse.getPaymentRequest().getAccountNo());
+
+		String amount = PaymentService.stringFormatter.print(paymentResponse.getPaymentRequest().getAmount()).replace(".", "");
+
+		int trackingId = (int) Dao.uniqueResultScalar("save_payment_record", paymentResponse.getPaymentRequest().getAccountNo(), amount, paymentRecord.getRecordDate().toDate());
+
+		// TODO get the new tracking ID from paymentHistory and record the seviceInstance/device the payment was for
+		paymentRecord.setTrackingId(trackingId);
+		return paymentRecord;
+	}
+
+	/**
+	 * Deprecated because the insertion does not return a tracking id.
+	 * 
+	 * @param paymentRequest
+	 * @param paymentResponse
+	 * @return
+	 * @throws AccountUpdateException
+	 */
+	@Deprecated
 	public static PaymentRecord addPayment(
 			PaymentRequest paymentRequest, PaymentResponse paymentResponse) throws AccountUpdateException {
 
@@ -244,7 +270,8 @@ public class AccountService extends KenanGatewayService {
 
 		// TODO set clientName as a property in configuration files;
 		try {
-			checkResponse(port.addPayment(USERNAME, accountNo, BILLING.externalIdType, amount, DateUtils.getXMLCalendar(recordDate), BILLING.paymentTransType, CONFIG.clientName));
+			MessageHolder message = checkResponse(port.addPayment(USERNAME, accountNo, BILLING.externalIdType, amount, DateUtils.getXMLCalendar(recordDate), BILLING.paymentTransType, CONFIG.clientName));
+			logger.debug("Status: {} Message: {}", message.getStatus(), message.getMessage());
 
 			// TODO get the new tracking ID from paymentHistory and record the seviceInstance/device the payment was for
 			PaymentRecord paymentRecord = new PaymentRecord(paymentResponse);

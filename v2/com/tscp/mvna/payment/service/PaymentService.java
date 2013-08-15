@@ -30,15 +30,14 @@ public class PaymentService extends PaymentGateway {
 	public static PaymentTransaction beginTransaction(
 			DeviceAndService device) {
 		PaymentTransaction paymentTransaction = new PaymentTransaction();
-		paymentTransaction.setRequest(new PaymentRequest(device));
-		paymentTransaction.setRequestBy(device.getOwner());
+		paymentTransaction.setPaymentRequest(new PaymentRequest(device));
 		return paymentTransaction;
 	}
 
 	public static PaymentRequest submitRequest(
 			PaymentTransaction paymentTransaction) throws PaymentServiceException {
-		paymentTransaction.setRequest(submitRequest(paymentTransaction.getRequest()));
-		return paymentTransaction.getRequest();
+		paymentTransaction.setPaymentRequest(submitRequest(paymentTransaction.getPaymentRequest()));
+		return paymentTransaction.getPaymentRequest();
 	}
 
 	protected static PaymentRequest submitRequest(
@@ -57,8 +56,8 @@ public class PaymentService extends PaymentGateway {
 
 	public static PaymentResponse submitPayment(
 			PaymentTransaction paymentTransaction) throws PaymentServiceException {
-		paymentTransaction.setResponse(submitPayment(paymentTransaction.getRequest()));
-		return paymentTransaction.getResponse();
+		paymentTransaction.setPaymentResponse(submitPayment(paymentTransaction.getPaymentRequest()));
+		return paymentTransaction.getPaymentResponse();
 	}
 
 	protected static PaymentResponse submitPayment(
@@ -70,20 +69,18 @@ public class PaymentService extends PaymentGateway {
 			throw new PaymentServiceException(paymentRequest.getClass().getSimpleName() + " does not have a valid Transaction ID");
 
 		PaymentResponse paymentResponse = new PaymentResponse(paymentRequest);
-		PaymentGatewayResponse paymentGatewayResponse;
+		Object[] gatewayResponse;
 
 		try {
-			paymentGatewayResponse = PaymentGateway.submitPayment(paymentRequest.getRequestBy(), paymentRequest.getCreditCard(), paymentRequest.getAmount());
+			gatewayResponse = PaymentGateway.submitPayment(paymentRequest.getRequestBy(), paymentRequest.getCreditCard(), paymentRequest.getAmount());
+			paymentResponse.setGatewayTransactionId((int) gatewayResponse[0]);
+			paymentResponse.setConfirmationCode((String) gatewayResponse[1]);
+			paymentResponse.setConfirmationMsg((String) gatewayResponse[2]);
+			paymentResponse.setAuthorizationCode((String) gatewayResponse[3]);
+			paymentResponse.setCvvCode((String) gatewayResponse[4]);
 		} catch (PaymentGatewayException e) {
 			logger.warn("Error posting payment to gateway for {}", paymentRequest, e);
 			throw new PaymentServiceException(e.getMessage());
-		}
-
-		try {
-			paymentResponse.parseGatewayResponse(paymentGatewayResponse);
-		} catch (PaymentGatewayException e) {
-			logger.warn("Error parsing {}", paymentGatewayResponse, e);
-			throw new PaymentServiceException(e);
 		}
 
 		try {
@@ -97,12 +94,12 @@ public class PaymentService extends PaymentGateway {
 
 	public static PaymentRecord submitRecord(
 			PaymentTransaction paymentTransaction) throws PaymentServiceException {
-		paymentTransaction.setRecord(saveRecord(paymentTransaction.getRequest(), paymentTransaction.getResponse()));
-		return paymentTransaction.getRecord();
+		paymentTransaction.setPaymentRecord(saveRecord(paymentTransaction.getPaymentResponse()));
+		return paymentTransaction.getPaymentRecord();
 	}
 
 	protected static PaymentRecord saveRecord(
-			PaymentRequest paymentRequest, PaymentResponse paymentResponse) throws PaymentServiceException {
+			PaymentResponse paymentResponse) throws PaymentServiceException {
 
 		if (paymentResponse == null)
 			throw new PaymentServiceException("No PaymentResponse to record");
@@ -112,7 +109,7 @@ public class PaymentService extends PaymentGateway {
 		if (!paymentResponse.isSuccess())
 			return null;
 
-		PaymentRecord paymentRecord = AccountService.addPayment(paymentRequest, paymentResponse);
+		PaymentRecord paymentRecord = AccountService.addPayment_sp(paymentResponse);
 
 		try {
 			Dao.save(paymentRecord);

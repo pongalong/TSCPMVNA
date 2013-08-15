@@ -2,12 +2,15 @@ package com.tscp.mvna.payment;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -31,7 +34,6 @@ import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 public class PaymentRecord implements Serializable {
 	private static final long serialVersionUID = -6631843556939094878L;
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentRecord.class);
-
 	protected int transactionId;
 	protected int trackingId;
 	protected DateTime recordDate = new DateTime();
@@ -40,13 +42,13 @@ public class PaymentRecord implements Serializable {
 	 * Constructors
 	 */
 
-	public PaymentRecord() {
+	protected PaymentRecord() {
 		// do nothing
 	}
 
-	// public PaymentRecord(PaymentResponse paymentResponse) {
-	// this.paymentResponse = paymentResponse;
-	// }
+	public PaymentRecord(PaymentResponse paymentResponse) {
+		this.paymentResponse = paymentResponse;
+	}
 
 	/* **************************************************
 	 * Getters and Setters
@@ -88,32 +90,32 @@ public class PaymentRecord implements Serializable {
 		this.trackingId = trackingId;
 	}
 
-	// protected PaymentResponse paymentResponse;
-	//
-	// @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	// @PrimaryKeyJoinColumn
-	// @XmlTransient
-	// protected PaymentResponse getPaymentResponse() {
-	// return paymentResponse;
-	// }
-	//
-	// protected void setPaymentResponse(
-	// PaymentResponse paymentResponse) {
-	// this.paymentResponse = paymentResponse;
-	// }
+	protected PaymentResponse paymentResponse;
 
-	protected PaymentTransaction paymentTransaction;
-
-	@OneToOne(mappedBy = "paymentRequest")
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@PrimaryKeyJoinColumn
 	@XmlTransient
-	public PaymentTransaction getPaymentTransaction() {
-		return paymentTransaction;
+	protected PaymentResponse getPaymentResponse() {
+		return paymentResponse;
 	}
 
-	public void setPaymentTransaction(
-			PaymentTransaction paymentTransaction) {
-		this.paymentTransaction = paymentTransaction;
+	protected void setPaymentResponse(
+			PaymentResponse paymentResponse) {
+		this.paymentResponse = paymentResponse;
 	}
+
+	// protected PaymentTransaction paymentTransaction;
+	//
+	// @OneToOne(mappedBy = "paymentRequest")
+	// @XmlTransient
+	// public PaymentTransaction getPaymentTransaction() {
+	// return paymentTransaction;
+	// }
+	//
+	// public void setPaymentTransaction(
+	// PaymentTransaction paymentTransaction) {
+	// this.paymentTransaction = paymentTransaction;
+	// }
 
 	/* **************************************************
 	 * Debug Methods

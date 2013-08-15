@@ -13,6 +13,6 @@ public class ContractService {
 	@SuppressWarnings("unchecked")
 	public static List<Contract> getContracts(
 			KenanAccount account, ServiceInstance serviceInstance) {
-		return (List<Contract>) Dao.executeNamedQuery("get_customer_coupons", account.getAccountNo(), serviceInstance.getExternalId());
+		return (List<Contract>) Dao.list("get_customer_coupons", account.getAccountNo(), serviceInstance.getExternalId());
 	}
 }

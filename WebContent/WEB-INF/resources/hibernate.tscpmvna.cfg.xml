@@ -47,13 +47,11 @@
     <mapping class="com.tscp.mvna.account.device.Topup" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
 
-    <mapping class="com.tscp.mvna.payment.PaymentTransaction" />
     <mapping class="com.tscp.mvna.payment.PaymentRequest" />
     <mapping class="com.tscp.mvna.payment.PaymentResponse" />
     <mapping class="com.tscp.mvna.payment.PaymentRecord" />
     <mapping class="com.tscp.mvna.payment.method.CreditCard" />
     <mapping class="com.tscp.mvna.payment.method.PaymentInfo" />
-    <mapping class="com.tscp.mvna.payment.service.PaymentGatewayResponse" />
 
     <!-- mappings for stored procedures -->
     <mapping resource="hibernate.tscpmvna.queries.xml" />

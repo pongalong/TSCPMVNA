@@ -36,7 +36,6 @@ import com.tscp.mvna.payment.service.PaymentGatewayResponse;
 public class PaymentResponse implements Serializable {
 	private static final long serialVersionUID = -7797401339183331832L;
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentResponse.class);
-
 	protected int transactionId;
 	protected DateTime responseDate = new DateTime();
 	protected PaymentRequest paymentRequest;
@@ -47,7 +46,7 @@ public class PaymentResponse implements Serializable {
 	 * Constructors
 	 */
 
-	public PaymentResponse() {
+	protected PaymentResponse() {
 		// do nothing
 	}
 
@@ -99,7 +98,7 @@ public class PaymentResponse implements Serializable {
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@PrimaryKeyJoinColumn
 	@XmlTransient
-	protected PaymentRequest getPaymentRequest() {
+	public PaymentRequest getPaymentRequest() {
 		return paymentRequest;
 	}
 
@@ -110,26 +109,13 @@ public class PaymentResponse implements Serializable {
 
 	@OneToOne(mappedBy = "paymentResponse")
 	@XmlTransient
-	protected PaymentRecord getPaymentRecord() {
+	public PaymentRecord getPaymentRecord() {
 		return paymentRecord;
 	}
 
 	protected void setPaymentRecord(
 			PaymentRecord paymentRecord) {
 		this.paymentRecord = paymentRecord;
-	}
-
-	protected PaymentTransaction paymentTransaction;
-
-	@OneToOne(mappedBy = "paymentRequest")
-	@XmlTransient
-	public PaymentTransaction getPaymentTransaction() {
-		return paymentTransaction;
-	}
-
-	public void setPaymentTransaction(
-			PaymentTransaction paymentTransaction) {
-		this.paymentTransaction = paymentTransaction;
 	}
 
 	/* **************************************************
@@ -192,6 +178,7 @@ public class PaymentResponse implements Serializable {
 		this.cvvCode = cvvCode;
 	}
 
+	@Deprecated
 	public void parseGatewayResponse(
 			PaymentGatewayResponse response) {
 

@@ -31,6 +31,7 @@ public class PaymentService extends PaymentGateway {
 			DeviceAndService device) {
 		PaymentTransaction paymentTransaction = new PaymentTransaction();
 		paymentTransaction.setRequest(new PaymentRequest(device));
+		paymentTransaction.setRequestBy(device.getOwner());
 		return paymentTransaction;
 	}
 

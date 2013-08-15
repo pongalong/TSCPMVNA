@@ -41,6 +41,7 @@ import com.tscp.mvna.payment.PaymentHistory;
 import com.tscp.mvna.payment.PaymentRecord;
 import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.PaymentResponse;
+import com.tscp.mvna.payment.PaymentTransaction;
 import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
@@ -221,10 +222,14 @@ public class AccountService extends KenanGatewayService {
 
 		try {
 
-			List<PaymentHolder> response = checkResponse(port.getCompletePaymentHistory(USERNAME, Integer.toString(accountNo)));
-			PaymentHistory paymentHistory = new PaymentHistory(response);
+			// List<PaymentHolder> response = checkResponse(port.getCompletePaymentHistory(USERNAME,
+			// Integer.toString(accountNo)));
+			// PaymentHistory paymentHistory = new PaymentHistory(response);
+			List<PaymentTransaction> asdf = Dao.executeNamedQuery("fetch_payment_history", accountNo);
+			PaymentHistory paymentHistory = new PaymentHistory();
+			paymentHistory.setPayments(asdf);
 			return paymentHistory;
-		} catch (KenanException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new PaymentFetchException("Unable to fetch PaymentHistory for Account " + accountNo, e);
 		}

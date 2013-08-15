@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -30,6 +31,7 @@ import com.tscp.mvna.payment.service.PaymentGatewayResponse;
 
 @Entity
 @Table(name = "PMT_RESPONSE")
+@Embeddable
 @XmlRootElement
 public class PaymentResponse implements Serializable {
 	private static final long serialVersionUID = -7797401339183331832L;
@@ -39,6 +41,7 @@ public class PaymentResponse implements Serializable {
 	protected DateTime responseDate = new DateTime();
 	protected PaymentRequest paymentRequest;
 	protected PaymentRecord paymentRecord;
+	protected boolean success;
 
 	/* **************************************************
 	 * Constructors
@@ -85,12 +88,12 @@ public class PaymentResponse implements Serializable {
 	@Column(name = "SUCCESS")
 	@Type(type = "yes_no")
 	public boolean isSuccess() {
-		return confirmationCode != null && confirmationCode.equalsIgnoreCase(PaymentGatewayResponse.SUCCESSFUL_TRANSACTION);
+		return success || (confirmationCode != null && confirmationCode.equalsIgnoreCase(PaymentGatewayResponse.SUCCESSFUL_TRANSACTION));
 	}
 
 	protected void setSuccess(
 			boolean success) {
-		// do nothing. Success is based on the confirmation code.
+		this.success = success;
 	}
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
@@ -114,6 +117,19 @@ public class PaymentResponse implements Serializable {
 	protected void setPaymentRecord(
 			PaymentRecord paymentRecord) {
 		this.paymentRecord = paymentRecord;
+	}
+
+	protected PaymentTransaction paymentTransaction;
+
+	@OneToOne(mappedBy = "paymentRequest")
+	@XmlTransient
+	public PaymentTransaction getPaymentTransaction() {
+		return paymentTransaction;
+	}
+
+	public void setPaymentTransaction(
+			PaymentTransaction paymentTransaction) {
+		this.paymentTransaction = paymentTransaction;
 	}
 
 	/* **************************************************

@@ -2,14 +2,12 @@ package com.tscp.mvna.payment;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,6 +26,7 @@ import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 
 @Entity
 @Table(name = "PMT_RECORD")
+@Embeddable
 @XmlRootElement
 public class PaymentRecord implements Serializable {
 	private static final long serialVersionUID = -6631843556939094878L;
@@ -36,7 +35,6 @@ public class PaymentRecord implements Serializable {
 	protected int transactionId;
 	protected int trackingId;
 	protected DateTime recordDate = new DateTime();
-	protected PaymentResponse paymentResponse;
 
 	/* **************************************************
 	 * Constructors
@@ -46,9 +44,9 @@ public class PaymentRecord implements Serializable {
 		// do nothing
 	}
 
-	public PaymentRecord(PaymentResponse paymentResponse) {
-		this.paymentResponse = paymentResponse;
-	}
+	// public PaymentRecord(PaymentResponse paymentResponse) {
+	// this.paymentResponse = paymentResponse;
+	// }
 
 	/* **************************************************
 	 * Getters and Setters
@@ -90,16 +88,31 @@ public class PaymentRecord implements Serializable {
 		this.trackingId = trackingId;
 	}
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-	@PrimaryKeyJoinColumn
+	// protected PaymentResponse paymentResponse;
+	//
+	// @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	// @PrimaryKeyJoinColumn
+	// @XmlTransient
+	// protected PaymentResponse getPaymentResponse() {
+	// return paymentResponse;
+	// }
+	//
+	// protected void setPaymentResponse(
+	// PaymentResponse paymentResponse) {
+	// this.paymentResponse = paymentResponse;
+	// }
+
+	protected PaymentTransaction paymentTransaction;
+
+	@OneToOne(mappedBy = "paymentRequest")
 	@XmlTransient
-	protected PaymentResponse getPaymentResponse() {
-		return paymentResponse;
+	public PaymentTransaction getPaymentTransaction() {
+		return paymentTransaction;
 	}
 
-	protected void setPaymentResponse(
-			PaymentResponse paymentResponse) {
-		this.paymentResponse = paymentResponse;
+	public void setPaymentTransaction(
+			PaymentTransaction paymentTransaction) {
+		this.paymentTransaction = paymentTransaction;
 	}
 
 	/* **************************************************

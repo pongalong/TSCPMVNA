@@ -3,6 +3,7 @@ package com.tscp.mvna.payment;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -30,23 +31,22 @@ import com.tscp.jaxb.xml.adapter.DateTimeAdapter;
 import com.tscp.mvna.account.Account;
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.payment.method.CreditCard;
-import com.tscp.mvna.user.User;
-import com.tscp.mvna.user.UserEntity;
 
 @Entity
 @Table(name = "PMT_REQUEST")
+@Embeddable
 @XmlRootElement
 public class PaymentRequest implements Serializable {
 	private static final long serialVersionUID = 2365845683459763290L;
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentRequest.class);
-
+	// protected UserEntity requestBy;
 	protected int transactionId;
 	protected int accountNo;
 	protected DateTime dateTime = new DateTime();
 	protected DeviceAndService device;
 	protected CreditCard creditCard;
 	protected Money amount;
-	protected UserEntity requestBy;
+
 	protected PaymentResponse paymentResponse;
 
 	/* **************************************************
@@ -62,7 +62,7 @@ public class PaymentRequest implements Serializable {
 		accountNo = device.getAccount().getAccountNo();
 		creditCard = device.getPaymentMethod();
 		amount = device.getTopup().getValue();
-		requestBy = device.getOwner();
+		// requestBy = device.getOwner();
 	}
 
 	/* **************************************************
@@ -138,17 +138,6 @@ public class PaymentRequest implements Serializable {
 		this.amount = amount;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
-	@JoinColumn(name = "REQUESTER_ID", nullable = false)
-	public UserEntity getRequestBy() {
-		return requestBy;
-	}
-
-	public void setRequestBy(
-			UserEntity requestBy) {
-		this.requestBy = requestBy;
-	}
-
 	@OneToOne(mappedBy = "paymentRequest")
 	@XmlTransient
 	protected PaymentResponse getPaymentResponse() {
@@ -158,6 +147,19 @@ public class PaymentRequest implements Serializable {
 	protected void setPaymentResponse(
 			PaymentResponse paymentResponse) {
 		this.paymentResponse = paymentResponse;
+	}
+
+	protected PaymentTransaction paymentTransaction;
+
+	@OneToOne(mappedBy = "paymentRequest")
+	@XmlTransient
+	public PaymentTransaction getPaymentTransaction() {
+		return paymentTransaction;
+	}
+
+	public void setPaymentTransaction(
+			PaymentTransaction paymentTransaction) {
+		this.paymentTransaction = paymentTransaction;
 	}
 
 	/* **************************************************
@@ -176,7 +178,7 @@ public class PaymentRequest implements Serializable {
 	@Override
 	public String toString() {
 		int deviceId = device != null ? device.getId() : null;
-		return "PaymentRequest [transactionId=" + transactionId + ", device=" + deviceId + ",  accountNo=" + accountNo + ", amount=" + amount + ", requestBy=" + requestBy + "]";
+		return "PaymentRequest [transactionId=" + transactionId + ", device=" + deviceId + ",  accountNo=" + accountNo + ", amount=" + amount + "]";
 	}
 
 }

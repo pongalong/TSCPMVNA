@@ -19,6 +19,10 @@ public class PaymentHistory implements KenanObject, TimeSensitive {
 	private DateTime instantiationTime = new DateTime();
 	private boolean loaded;
 
+	public PaymentHistory() {
+
+	}
+
 	public PaymentHistory(List<PaymentHolder> paymentHolderList) {
 		payments = new ArrayList<PaymentTransaction>();
 

@@ -3,14 +3,8 @@ package com.tscp.mvna.tester;
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.account.device.network.service.NetworkGateway;
 import com.tscp.mvna.dao.Dao;
-import com.tscp.mvna.payment.PaymentRecord;
-import com.tscp.mvna.payment.PaymentRequest;
-import com.tscp.mvna.payment.PaymentResponse;
 import com.tscp.mvna.payment.PaymentTransaction;
-import com.tscp.mvna.payment.exception.PaymentGatewayException;
-import com.tscp.mvna.payment.exception.PaymentServiceException;
 import com.tscp.mvna.payment.service.PaymentGateway;
-import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvna.ws.TSCPMVNA2;
 import com.tscp.util.profiler.Profiler;
 
@@ -34,41 +28,30 @@ public class Tester {
 		DeviceAndService device = port.getDevice(24111);
 
 		try {
-			device.getNetworkInfo();
-			device.suspend();
-			Thread.sleep(10000);
-			device.restore();
+			// PaymentTransaction paymentTransaction = PaymentService.beginTransaction(device);
+			// PaymentRequest request = PaymentService.submitRequest(paymentTransaction);
+			// PaymentResponse response = PaymentService.submitPayment(paymentTransaction);
+			// PaymentRecord record = PaymentService.submitRecord(paymentTransaction);
+
+			// PaymentHistory paymentHistory = AccountService.getPaymentHistory(device.getAccountNo());
+			// for (PaymentTransaction pt : paymentHistory.getPayments())
+			// System.out.println(pt);
+
+			PaymentTransaction pt = (PaymentTransaction) Dao.get(PaymentTransaction.class, 69068);
+			System.out.println(pt);
+
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("NetworkException caught: " + e.getMessage());
-		}
-
-		try {
-
-			PaymentTransaction paymentTransaction = PaymentService.beginTransaction(device);
-			PaymentRequest request = PaymentService.submitRequest(paymentTransaction);
-			PaymentResponse response = PaymentService.submitPayment(paymentTransaction);
-			PaymentRecord record = PaymentService.submitRecord(paymentTransaction);
-
-			paymentTransaction = PaymentService.beginTransaction(device);
-			request = PaymentService.submitRequest(paymentTransaction);
-			response = PaymentService.submitPayment(paymentTransaction);
-			record = PaymentService.submitRecord(paymentTransaction);
-
+			System.err.println("PaymentException caught: " + e.getMessage());
+		} finally {
 			System.out.println("* Payment Gateway Statistics*");
 			Profiler paymentProfiler = PaymentGateway.getProfiler();
 			System.out.println(paymentProfiler.getResultMap());
-
 			System.out.println("\n* Network Gateway Statistics*");
 			Profiler networkProfiler = NetworkGateway.getProfiler();
 			System.out.println(networkProfiler.getResultMap());
-
 			System.out.println("\n* DAO Statistics*");
 			Profiler daoProfiler = Dao.getProfiler();
 			System.out.println(daoProfiler.getResultMap());
-
-		} catch (PaymentServiceException | PaymentGatewayException e) {
-			System.err.println("PaymentException caught: " + e.getMessage());
 		}
 	}
 }

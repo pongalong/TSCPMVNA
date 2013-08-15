@@ -47,6 +47,7 @@
     <mapping class="com.tscp.mvna.account.device.Topup" />
     <mapping class="com.tscp.mvna.account.device.usage.UsageSession" />
 
+    <mapping class="com.tscp.mvna.payment.PaymentTransaction" />
     <mapping class="com.tscp.mvna.payment.PaymentRequest" />
     <mapping class="com.tscp.mvna.payment.PaymentResponse" />
     <mapping class="com.tscp.mvna.payment.PaymentRecord" />

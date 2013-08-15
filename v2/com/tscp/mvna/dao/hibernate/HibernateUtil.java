@@ -32,6 +32,7 @@ public abstract class HibernateUtil {
 			return configuration.buildSessionFactory(serviceRegistry);
 		} catch (Throwable e) {
 			logger.error("Initial SessionFactory creation failed", e);
+			e.printStackTrace();
 			throw new ExceptionInInitializerError(e);
 		}
 	}

@@ -30,7 +30,7 @@
       <return-property name="externalId" column="external_id" />
       <return-property name="balance" column="balance" />
     </return>
-    <![CDATA[ call sp_fetch_charge_history(?, :1_account_no, :2_external_id) ]]>
+    <![CDATA[ call SP_FETCH_CHARGE_HISTORY(?, :1_account_no, :2_external_id) ]]>
   </sql-query>
 
   <sql-query name="fetch_unlinked_account" callable="true">
@@ -41,7 +41,34 @@
       <return-property name="paymentTransId" column="trans_id" />
       <return-property name="paymentTransDate" column="pmt_trans_date" />
     </return>
-    <![CDATA[ call MVNA_API_PKG.fetch_unlinked_account(?, :1_cust_id) ]]>
+    <![CDATA[ call MVNA_API_PKG.FETCH_UNLINKED_ACCOUNT(?, :1_cust_id) ]]>
+  </sql-query>
+
+  <sql-query name="fetch_payment_history" callable="true">
+    <return class="com.tscp.mvna.payment.PaymentTransaction">
+      <return-property name="transactionId" column="trans_id" />
+      <return-property name="request.requestDate" column="request_date" />
+      <return-property name="request.accountNo" column="account_no" />
+      <return-property name="request.creditCard.id" column="pmt_id" />
+      <return-property name="request.amount" column="amount" />
+      <return-property name="request.requestBy.id" column="requester_id" />
+      <return-property name="request.device.id" column="device_id" />
+      <return-property name="response.responseDate" column="response_date" />
+      <return-property name="response.confirmationCode" column="conf_code" />
+      <return-property name="response.confirmationMsg" column="conf_msg" />
+      <return-property name="response.authorizationCode" column="auth_code" />
+      <return-property name="response.cvvCode" column="cvv_code" />
+      <return-property name="response.success" column="success" />
+      <return-property name="response.gatewayTransactionId" column="gateway_trans_id" />
+      <return-property name="record.recordDate" column="record_date" />
+      <return-property name="record.trackingId" column="tracking_id" />
+    </return>
+    <![CDATA[ 
+    from PaymentRequest as req 
+    left outer join req.paymentResponse as res
+    left outer join res.paymentRecord as rec 
+    where accountNo = :accountNo
+    order by req.transactionId desc ]]>
   </sql-query>
 
 </hibernate-mapping>

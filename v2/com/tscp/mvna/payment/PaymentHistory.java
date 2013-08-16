@@ -1,59 +1,49 @@
 package com.tscp.mvna.payment;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.DateTime;
-import org.joda.time.Period;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.telscape.billingserviceinterface.PaymentHolder;
-import com.tscp.mvna.TimeSensitive;
-import com.tscp.mvna.account.kenan.KenanObject;
+import com.tscp.mvna.account.kenan.TimeSensitiveKenanObjectCollection;
+import com.tscp.mvna.account.kenan.exception.PaymentFetchException;
+import com.tscp.mvna.account.kenan.service.AccountService;
 
-public class PaymentHistory implements KenanObject, TimeSensitive {
+@XmlRootElement
+public class PaymentHistory extends TimeSensitiveKenanObjectCollection<PaymentRequest> {
+	private static final long serialVersionUID = -3380526992973052463L;
 	protected static final Logger logger = LoggerFactory.getLogger(PaymentHistory.class);
-	private List<PaymentTransaction> payments;
+	private int accountNo;
 
-	private DateTime instantiationTime = new DateTime();
-	private boolean loaded;
+	/* **************************************************
+	 * Constructors
+	 */
 
-	public PaymentHistory() {
-
+	public PaymentHistory(int accountNo) {
+		this.accountNo = accountNo;
 	}
 
-	public PaymentHistory(List<PaymentHolder> paymentHolderList) {
-		payments = new ArrayList<PaymentTransaction>();
-
-		for (PaymentHolder ph : paymentHolderList)
-			payments.add(new PaymentTransaction(ph.getPayment()));
+	public PaymentHistory(List<PaymentRequest> paymentRequests) {
+		super.addAll(paymentRequests);
+		loaded = true;
 	}
 
-	public List<PaymentTransaction> getPayments() {
-		return payments;
-	}
-
-	public void setPayments(
-			List<PaymentTransaction> payments) {
-		this.payments = payments;
-	}
+	/* **************************************************
+	 * Fetch Methods
+	 */
 
 	@Override
-	public boolean isStale() {
-		Period elapsed = new Period(instantiationTime, new DateTime());
-		return elapsed.getMinutes() > 15;
-	}
-
-	@Override
-	public void refresh() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean isLoaded() {
-		return loaded;
+	protected List<PaymentRequest> loadValue() {
+		try {
+			return AccountService.getPaymentRequests(accountNo);
+		} catch (PaymentFetchException e) {
+			logger.error("Error loading PaymentHistory for Account {}", accountNo, e);
+		} finally {
+			loaded = true;
+		}
+		return null;
 	}
 
 }

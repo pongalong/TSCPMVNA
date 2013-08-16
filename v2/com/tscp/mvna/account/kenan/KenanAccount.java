@@ -10,30 +10,62 @@ import javax.xml.bind.annotation.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tscp.mvna.account.Balance;
-import com.tscp.mvna.account.Contact;
+import com.tscp.mvna.account.kenan.provision.Service;
 
 @MappedSuperclass
-public class KenanAccount implements KenanObject {
+public class KenanAccount extends KenanObject {
+	private static final long serialVersionUID = -4599362937702458223L;
 	protected static final Logger logger = LoggerFactory.getLogger(KenanAccount.class);
 	protected int accountNo;
 	protected Balance balance;
 	protected Contact contact;
 	protected Service service;
 
+	/* **************************************************
+	 * Constructors
+	 */
+
+	protected KenanAccount() {
+		// prevent instantiation
+	}
+
+	public KenanAccount(int accountNo) {
+		this.accountNo = accountNo;
+	}
+
+	/* **************************************************
+	 * Fetch Methods
+	 */
+
+	@Override
+	public void reset() {
+		super.reset();
+		balance = null;
+		contact = null;
+		service = null;
+	}
+
 	@Override
 	@Transient
 	public boolean isLoaded() {
-		boolean nullCheck = contact != null && balance != null;
+		boolean nullCheck = contact != null && balance != null && service != null;
 		boolean loadedCheck = contact.isLoaded() && balance.isLoaded() && service.isLoaded();
 		return nullCheck && loadedCheck;
 	}
 
 	@Override
-	public void refresh() {
-		balance = null;
-		contact = null;
-		service = null;
+	public void load() {
+		if (balance != null)
+			balance.load();
+		if (contact != null)
+			contact.load();
+		if (service != null)
+			service.load();
+	}
+
+	@Override
+	protected Object loadValue() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
 	}
 
 	/* **************************************************
@@ -58,8 +90,8 @@ public class KenanAccount implements KenanObject {
 		if (balance == null)
 			balance = new Balance(accountNo);
 		if (!balance.isLoaded())
-			balance.refresh();
-		else if (balance.isLoaded() && balance.isStale())
+			balance.load();
+		else if (balance.isStale())
 			balance.refresh();
 		return balance;
 	}
@@ -75,7 +107,7 @@ public class KenanAccount implements KenanObject {
 		if (contact == null)
 			contact = new Contact(accountNo);
 		if (!contact.isLoaded())
-			contact.refresh();
+			contact.load();
 		return contact;
 	}
 
@@ -90,7 +122,7 @@ public class KenanAccount implements KenanObject {
 		if (service == null)
 			service = new Service(this);
 		if (!service.isLoaded())
-			service.refresh();
+			service.load();
 		return service;
 	}
 
@@ -99,4 +131,17 @@ public class KenanAccount implements KenanObject {
 		this.service = service;
 	}
 
+	/* **************************************************
+	 * Debug Methods
+	 */
+
+	@Override
+	public String toString() {
+		String contactEmail = contact != null ? contact.getEmail() : null;
+		String toString = "KenanAccount [accountNo=" + accountNo;
+		if (contactEmail != null)
+			toString += ", contact=" + contactEmail;
+		toString += "]";
+		return toString;
+	}
 }

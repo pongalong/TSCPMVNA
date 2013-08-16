@@ -31,7 +31,7 @@ public class ProvisionServicePackageService extends ProvisionService {
 		try {
 			List<ServicePackage> results = new ArrayList<ServicePackage>();
 			for (PackageHolder packageHolder : checkResponse(port.getListActivePackages(USERNAME, Integer.toString(accountNo))))
-				results.add(new ServicePackage(packageHolder.getPackage()));
+				results.add(ServicePackage.fromBillingPackage(packageHolder.getPackage()));
 			return results;
 		} catch (ProvisionException e) {
 			return null;
@@ -111,7 +111,7 @@ public class ProvisionServicePackageService extends ProvisionService {
 	public static ArrayOfPackage toBillingPackageList(
 			ServicePackage servicePackage) {
 		ArrayOfPackage result = new ArrayOfPackage();
-		result.getPackage().add(servicePackage.toBillingPackage());
+		result.getPackage().add(ServicePackage.toBillingPackage(servicePackage));
 		return result;
 	}
 

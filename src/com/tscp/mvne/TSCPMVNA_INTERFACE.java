@@ -12,7 +12,7 @@ import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.contract.KenanContract;
 import com.tscp.mvne.billing.exception.BillingException;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 import com.tscp.mvne.customer.Customer;
 import com.tscp.mvne.customer.DeviceException;
 import com.tscp.mvne.customer.dao.CustTopUp;
@@ -49,7 +49,7 @@ public interface TSCPMVNA_INTERFACE {
 			Customer customer, Account account);
 
 	public abstract List<KenanContract> getContracts(
-			Account account, ServiceInstance serviceInstance);
+			Account account, ServiceInstanceOld serviceInstance);
 
 	public abstract PaymentInvoice getCustomerInvoice(
 			Customer customer, int transId);

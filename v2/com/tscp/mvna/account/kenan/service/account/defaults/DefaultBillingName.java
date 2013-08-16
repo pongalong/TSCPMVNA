@@ -1,7 +1,7 @@
 package com.tscp.mvna.account.kenan.service.account.defaults;
 
 import com.telscape.billingserviceinterface.BillName;
-import com.tscp.mvna.account.Contact;
+import com.tscp.mvna.account.kenan.Contact;
 
 public class DefaultBillingName extends BillName {
 

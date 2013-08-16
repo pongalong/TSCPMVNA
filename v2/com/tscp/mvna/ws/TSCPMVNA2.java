@@ -18,8 +18,10 @@ import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.device.usage.UsageHistory;
 import com.tscp.mvna.account.kenan.exception.AccountCreationException;
+import com.tscp.mvna.account.kenan.exception.PaymentFetchException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
+import com.tscp.mvna.payment.PaymentHistory;
 import com.tscp.mvna.payment.PaymentTransaction;
 import com.tscp.mvna.payment.method.CreditCard;
 import com.tscp.mvna.user.Customer;
@@ -76,7 +78,6 @@ public class TSCPMVNA2 {
 	@WebMethod
 	public UsageHistory getUsageHistoryByDevice(
 			DeviceAndService device) {
-		// device = getDevice(device.getId());
 		return getUsageHistoryById(device.getAccountNo(), device.getService().getActiveServiceInstance().getExternalId());
 	}
 
@@ -141,6 +142,12 @@ public class TSCPMVNA2 {
 	/* **************************************************
 	 * Account Methods
 	 */
+
+	@WebMethod
+	public PaymentHistory fetchPaymentHistory(
+			int accountNo) throws PaymentFetchException {
+		return new PaymentHistory(AccountService.getPaymentRequests(accountNo));
+	}
 
 	@WebMethod
 	public int createAccount(

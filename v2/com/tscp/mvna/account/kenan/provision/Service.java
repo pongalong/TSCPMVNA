@@ -1,4 +1,4 @@
-package com.tscp.mvna.account.kenan;
+package com.tscp.mvna.account.kenan.provision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tscp.mvna.account.kenan.provision.InstallComponent;
-import com.tscp.mvna.account.kenan.provision.ReinstallComponent;
-import com.tscp.mvna.account.kenan.provision.ServiceComponent;
-import com.tscp.mvna.account.kenan.provision.ServiceInstance;
-import com.tscp.mvna.account.kenan.provision.ServicePackage;
-import com.tscp.mvna.account.kenan.provision.SuspendComponent;
+import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
 import com.tscp.mvna.account.kenan.provision.exception.ServiceConnectException;
@@ -29,7 +24,7 @@ import com.tscp.mvna.account.kenan.provision.service.ProvisionServicePackageServ
 import com.tscp.mvne.config.PROVISION;
 
 @XmlRootElement
-public class Service implements KenanObject {
+public class Service {
 	protected static final Logger logger = LoggerFactory.getLogger(Service.class);
 
 	protected KenanAccount account;
@@ -53,11 +48,8 @@ public class Service implements KenanObject {
 		this.account = account;
 	}
 
-	public Service(ServiceInstance newServiceInstance) throws ServiceConnectException {
-		if (newServiceInstance.getAccount() == null)
-			throw new ServiceConnectException("Service cannot be created: Account is null");
-
-		account = newServiceInstance.getAccount();
+	public Service(KenanAccount account, ServiceInstance newServiceInstance) throws ServiceConnectException {
+		this.account = account;
 		serviceInstances = new ArrayList<ServiceInstance>();
 		serviceInstances.add(newServiceInstance);
 	}
@@ -99,8 +91,8 @@ public class Service implements KenanObject {
 		newServiceInstance = ProvisionServiceInstanceService.addServiceInstance(account, newServiceInstance);
 		newServicePackage = ProvisionServicePackageService.addPackage(account.getAccountNo(), new ServicePackage());
 		newServiceComponent.setExternalId(newServiceInstance.getExternalId());
-		newServiceComponent.setServicePackage(newServicePackage);
-		newServiceComponent = ProvisionServiceComponentService.addInitialComponent(newServiceComponent);
+		// newServiceComponent.setServicePackage(newServicePackage);
+		newServiceComponent = ProvisionServiceComponentService.addInitialComponent(newServiceComponent, newServicePackage);
 		refresh();
 	}
 
@@ -129,8 +121,8 @@ public class Service implements KenanObject {
 
 		ServiceComponent restoreComponent = getActiveServiceComponent().isCurrentMonth() ? new ReinstallComponent(getActiveServiceComponent()) : new InstallComponent(getActiveServiceComponent());
 
-		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent());
-		ProvisionServiceComponentService.addComponent(restoreComponent);
+		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent(), getActiveServicePackage());
+		ProvisionServiceComponentService.addComponent(restoreComponent, getActiveServicePackage());
 		refreshServiceComponents();
 	}
 
@@ -150,8 +142,8 @@ public class Service implements KenanObject {
 		if (getActiveServiceComponent().getId() != PROVISION.COMPONENT.INSTALL && getActiveServiceComponent().getId() != PROVISION.COMPONENT.REINSTALL)
 			throw new ServiceSuspendException("Service cannot be suspended: Current ServiceComponent is not ACTIVE");
 
-		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent());
-		ProvisionServiceComponentService.addFutureComponent(new SuspendComponent(getActiveServiceComponent()));
+		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent(), getActiveServicePackage());
+		ProvisionServiceComponentService.addFutureComponent(new SuspendComponent(getActiveServiceComponent()), getActiveServicePackage());
 		refreshServiceComponents();
 	}
 
@@ -175,12 +167,14 @@ public class Service implements KenanObject {
 	 * Fetch Methods
 	 */
 
-	@Override
+	public void load() {
+		refresh();
+	}
+
 	public boolean isLoaded() {
 		return loadedServiceInstances && loadedServicePackages && loadedServiceComponents;
 	}
 
-	@Override
 	public void refresh() {
 		refreshServiceInstances();
 		refreshServicePackages();
@@ -251,9 +245,9 @@ public class Service implements KenanObject {
 	protected List<ServiceInstance> loadServiceInstances() {
 		try {
 			List<ServiceInstance> result = ProvisionServiceInstanceService.getActiveServices(account.getAccountNo());
-			if (result != null)
-				for (ServiceInstance si : result)
-					si.setAccount(account);
+			// if (result != null)
+			// for (ServiceInstance si : result)
+			// si.setAccount(account);
 			return result;
 		} catch (ProvisionFetchException e) {
 			logger.error("Unable to fetch ServiceInstances for {}", this);

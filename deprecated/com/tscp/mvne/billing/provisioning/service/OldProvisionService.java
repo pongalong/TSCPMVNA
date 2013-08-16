@@ -9,7 +9,7 @@ import com.tscp.mvne.billing.provisioning.Component;
 import com.tscp.mvne.billing.provisioning.Package;
 import com.tscp.mvne.billing.provisioning.ProvisionSystem;
 import com.tscp.mvne.billing.provisioning.ProvisionSystemProvider;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 import com.tscp.mvne.config.PROVISION;
 
 public class OldProvisionService {
@@ -160,8 +160,8 @@ public class OldProvisionService {
     return system.getActivePackages(accountNo);
   }
 
-  public ServiceInstance getActiveService(int accountNo) throws ProvisionException {
-    List<ServiceInstance> services = getActiveServices(accountNo);
+  public ServiceInstanceOld getActiveService(int accountNo) throws ProvisionException {
+    List<ServiceInstanceOld> services = getActiveServices(accountNo);
     if (services == null || services.isEmpty()) {
       throw new ProvisionException("Account " + accountNo + " has no active service");
     } else if (services.size() > 1) {
@@ -171,7 +171,7 @@ public class OldProvisionService {
     }
   }
 
-  public List<ServiceInstance> getActiveServices(int accountNo) throws ProvisionException {
+  public List<ServiceInstanceOld> getActiveServices(int accountNo) throws ProvisionException {
     return system.getActiveServices(accountNo);
   }
 

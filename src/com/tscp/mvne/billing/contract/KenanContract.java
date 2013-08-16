@@ -2,11 +2,11 @@ package com.tscp.mvne.billing.contract;
 
 import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.contract.exception.ContractException;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 
 public class KenanContract {
   private Account account;
-  private ServiceInstance serviceInstance;
+  private ServiceInstanceOld serviceInstance;
   private int contractType;
   private int contractId;
   private int duration;
@@ -20,11 +20,11 @@ public class KenanContract {
     this.account = account;
   }
 
-  public ServiceInstance getServiceInstance() {
+  public ServiceInstanceOld getServiceInstance() {
     return serviceInstance;
   }
 
-  public void setServiceInstance(ServiceInstance serviceInstance) {
+  public void setServiceInstance(ServiceInstanceOld serviceInstance) {
     this.serviceInstance = serviceInstance;
   }
 

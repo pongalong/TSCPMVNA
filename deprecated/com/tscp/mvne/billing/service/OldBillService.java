@@ -56,7 +56,7 @@ import com.tscp.mvne.billing.BillingUtil;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
 import com.tscp.mvne.billing.provisioning.Package;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 import com.tscp.mvne.config.CONFIG;
 import com.tscp.util.DateUtils;
 
@@ -85,7 +85,7 @@ public class OldBillService {
 	}
 
 	public void addComponent(
-			Account account, ServiceInstance serviceinstance, Package iPackage, Component componentid) throws BillingException {
+			Account account, ServiceInstanceOld serviceinstance, Package iPackage, Component componentid) throws BillingException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("addComponent", "Error adding service to unknown Account");
 		}
@@ -130,7 +130,7 @@ public class OldBillService {
 	}
 
 	public void addPackage(
-			Account account, ServiceInstance serviceinstance, Package iPackage) throws BillingException {
+			Account account, ServiceInstanceOld serviceinstance, Package iPackage) throws BillingException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("addServiceInstance", "Error adding service to unknown Account");
 		}
@@ -191,7 +191,7 @@ public class OldBillService {
 	}
 
 	public void addServiceInstance(
-			Account account, ServiceInstance serviceinstance) throws BillingException, ProvisionException {
+			Account account, ServiceInstanceOld serviceinstance) throws BillingException, ProvisionException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("addServiceInstance", "Error adding service to unknown Account");
 		}
@@ -204,7 +204,7 @@ public class OldBillService {
 		reactivateBillingAccount(account.getAccountNo());
 		boolean contains = false;
 		// if( account.getServiceinstancelist().contains(arg0))
-		for (ServiceInstance si : account.getServiceinstancelist()) {
+		for (ServiceInstanceOld si : account.getServiceinstancelist()) {
 			if (si.getExternalId().equals(serviceinstance.getExternalId().trim())) {
 				contains = true;
 				break;
@@ -298,7 +298,7 @@ public class OldBillService {
 	}
 
 	public void deleteServiceInstance(
-			Account account, ServiceInstance serviceinstance) throws BillingException {
+			Account account, ServiceInstanceOld serviceinstance) throws BillingException {
 		logger.info("Disconnecting Service on Account {} and Service {}", account.getAccountNo(), serviceinstance.getExternalId());
 		if (account == null || account.getAccountNo() == 0) {
 			throw new BillingException("Please specify an account to delete this service against");
@@ -613,7 +613,7 @@ public class OldBillService {
 	}
 
 	public List<Component> getComponentList(
-			Account account, ServiceInstance serviceinstance, Package packageinstance) throws BillingException {
+			Account account, ServiceInstanceOld serviceinstance, Package packageinstance) throws BillingException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("getComponentList", "Account information not populated...");
 		}
@@ -720,7 +720,7 @@ public class OldBillService {
 	}
 
 	public List<Package> getPackageList(
-			Account account, ServiceInstance serviceinstance) throws BillingException {
+			Account account, ServiceInstanceOld serviceinstance) throws BillingException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("getPackageList", "Account information not populated...");
 		}
@@ -759,7 +759,7 @@ public class OldBillService {
 		return packageList;
 	}
 
-	public List<ServiceInstance> getServiceInstanceList(
+	public List<ServiceInstanceOld> getServiceInstanceList(
 			Account account) throws BillingException {
 		if (account == null || account.getAccountNo() <= 0) {
 			throw new BillingException("getServiceInstanceList", "Account information must be populated.");
@@ -767,9 +767,9 @@ public class OldBillService {
 		try {
 			ArrayOfServiceHolder serviceHolderList = port.getActiveService(USERNAME, Integer.toString(account.getAccountNo()));
 			if (serviceHolderList != null) {
-				Vector<ServiceInstance> serviceInstanceList = new Vector<ServiceInstance>();
+				Vector<ServiceInstanceOld> serviceInstanceList = new Vector<ServiceInstanceOld>();
 				for (ServiceHolder serviceHolder : serviceHolderList.getServiceHolder()) {
-					ServiceInstance serviceInstance = new ServiceInstance();
+					ServiceInstanceOld serviceInstance = new ServiceInstanceOld();
 					serviceInstance.setExternalId(serviceHolder.getService().getExternalId());
 					serviceInstance.setExternalIdType(serviceHolder.getService().getExternalIdType());
 					serviceInstance.setSubscriberNumber(Integer.parseInt(serviceHolder.getService().getSubscrNo()));
@@ -791,13 +791,13 @@ public class OldBillService {
 		q.setParameter("in_account_no", account.getAccountNo());
 
 		@SuppressWarnings("unchecked")
-		List<ServiceInstance> serviceInstanceList = (List<ServiceInstance>) q.list();
+		List<ServiceInstanceOld> serviceInstanceList = (List<ServiceInstanceOld>) q.list();
 		session.getTransaction().rollback();
 		return serviceInstanceList;
 	}
 
 	public UsageHolder getUnbilledUsageSummary(
-			ServiceInstance serviceInstance) {
+			ServiceInstanceOld serviceInstance) {
 		UsageHolder usageHolder = port.getUnbilledDataMBs(USERNAME, serviceInstance.getExternalId());
 		return usageHolder;
 	}
@@ -844,7 +844,7 @@ public class OldBillService {
 	}
 
 	public void updateServiceInstanceStatus(
-			ServiceInstance serviceInstance, int newThreshold) throws BillingException {
+			ServiceInstanceOld serviceInstance, int newThreshold) throws BillingException {
 
 		if (serviceInstance == null || serviceInstance.getExternalId() == null || serviceInstance.getExternalId().trim().length() == 0)
 			throw new BillingException("Valid service instance required");

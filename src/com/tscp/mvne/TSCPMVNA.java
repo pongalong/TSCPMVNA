@@ -44,7 +44,7 @@ import com.tscp.mvne.billing.contract.KenanContract;
 import com.tscp.mvne.billing.exception.BillingException;
 import com.tscp.mvne.billing.provisioning.Component;
 import com.tscp.mvne.billing.provisioning.Package;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 import com.tscp.mvne.billing.provisioning.service.OldProvisionService;
 import com.tscp.mvne.billing.service.OldBillService;
 import com.tscp.mvne.config.DEVICE;
@@ -302,10 +302,10 @@ public class TSCPMVNA {
 	}
 
 	private void bindServiceInstanceObject(
-			Account account, ServiceInstance serviceInstance) {
-		List<ServiceInstance> serviceInstanceList = billService.getServiceInstanceList(account);
+			Account account, ServiceInstanceOld serviceInstance) {
+		List<ServiceInstanceOld> serviceInstanceList = billService.getServiceInstanceList(account);
 		if (serviceInstanceList != null) {
-			for (ServiceInstance si : serviceInstanceList) {
+			for (ServiceInstanceOld si : serviceInstanceList) {
 				if (si.getExternalId().equals(serviceInstance.getExternalId())) {
 					serviceInstance.setExternalIdType(si.getExternalIdType());
 				}
@@ -340,7 +340,7 @@ public class TSCPMVNA {
 	}
 
 	private void createReinstallServiceInstance(
-			Account account, ServiceInstance serviceInstance, OldDevice device) throws BillingException, ProvisionException {
+			Account account, ServiceInstanceOld serviceInstance, OldDevice device) throws BillingException, ProvisionException {
 		MethodLogger.logMethod("createReinstallServiceInstance", account, serviceInstance, device);
 		try {
 			account.setServiceinstancelist(billService.getServiceInstanceList(account));
@@ -362,9 +362,9 @@ public class TSCPMVNA {
 			logger.info("Adding new association");
 			// logger.info("Updating Device Association");
 			logger.info("attempting to retrieve subscr_no for EXTERNAL_ID " + serviceInstance.getExternalId());
-			List<ServiceInstance> serviceInstanceList = billService.getServiceInstanceList(account);
+			List<ServiceInstanceOld> serviceInstanceList = billService.getServiceInstanceList(account);
 			if (serviceInstanceList != null) {
-				for (ServiceInstance tempServiceInstance : serviceInstanceList) {
+				for (ServiceInstanceOld tempServiceInstance : serviceInstanceList) {
 					if (tempServiceInstance.getExternalId().equals(serviceInstance.getExternalId())) {
 						logger.info("Subscriber " + tempServiceInstance.getSubscriberNumber() + " found");
 						logger.info("Building Device Association Mapping");
@@ -403,7 +403,7 @@ public class TSCPMVNA {
 
 	@WebMethod
 	public Account createServiceInstance(
-			Account account, ServiceInstance serviceInstance) throws BillingException, ProvisionException {
+			Account account, ServiceInstanceOld serviceInstance) throws BillingException, ProvisionException {
 		MethodLogger.logMethod("createServiceInstance", account, serviceInstance);
 		try {
 			account.setServiceinstancelist(billService.getServiceInstanceList(account));
@@ -421,7 +421,7 @@ public class TSCPMVNA {
 		billService.addComponent(account, serviceInstance, lPackage, componentid);
 
 		if (account.getServiceinstancelist() == null) {
-			account.setServiceinstancelist(new Vector<ServiceInstance>());
+			account.setServiceinstancelist(new Vector<ServiceInstanceOld>());
 		}
 		account.getServiceinstancelist().add(serviceInstance);
 		if (account.getPackageList() == null) {
@@ -455,9 +455,9 @@ public class TSCPMVNA {
 						if (device.getValue().equals(networkInfo.getEsnmeiddec()) || device.getValue().equals(networkInfo.getEsnmeidhex())) {
 							logger.info("found device " + device.getId() + "...");
 							logger.info("attempting to retrieve subscr_no for EXTERNAL_ID " + serviceInstance.getExternalId());
-							List<ServiceInstance> serviceInstanceList = billService.getServiceInstanceList(account);
+							List<ServiceInstanceOld> serviceInstanceList = billService.getServiceInstanceList(account);
 							if (serviceInstanceList != null) {
-								for (ServiceInstance si : serviceInstanceList) {
+								for (ServiceInstanceOld si : serviceInstanceList) {
 									if (si.getExternalId().equals(serviceInstance.getExternalId())) {
 										logger.info("Subscriber " + si.getSubscriberNumber() + " found");
 										logger.info("Building Device Association Mapping");
@@ -601,14 +601,14 @@ public class TSCPMVNA {
 
 	@WebMethod
 	public void disconnectService(
-			ServiceInstance serviceInstance) throws DisconnectException, NetworkException, NetworkQueryException, ProvisionException {
+			ServiceInstanceOld serviceInstance) throws DisconnectException, NetworkException, NetworkQueryException, ProvisionException {
 		MethodLogger.logMethod("disconnectService", serviceInstance);
 		logger.info("Calling Disconnect Service for External ID " + serviceInstance.getExternalId());
 		Account account = new Account();
 		logger.info("fetching account by TN");
 		try {
 			account.setAccountNo(billService.getAccountNoByTN(serviceInstance.getExternalId()));
-			ServiceInstance si = provisionService.getActiveService(account.getAccountNo());
+			ServiceInstanceOld si = provisionService.getActiveService(account.getAccountNo());
 			if (si.getExternalId().equals(serviceInstance.getExternalId())) {
 				serviceInstance = si;
 			}
@@ -674,7 +674,7 @@ public class TSCPMVNA {
 
 	@WebMethod
 	public void disconnectServiceInstanceFromKenan(
-			Account account, ServiceInstance serviceInstance) {
+			Account account, ServiceInstanceOld serviceInstance) {
 		List<KenanContract> contracts = contractService.getContracts(account, serviceInstance);
 		if (contracts != null) {
 			for (KenanContract contract : contracts) {
@@ -769,7 +769,7 @@ public class TSCPMVNA {
 	@WebMethod
 	public AccountStatus getAccountStatus(
 			int custId, int accountNo, int deviceId) throws DeviceException, NetworkException, ProvisionException, NetworkQueryException {
-		ServiceInstance serviceInstance = provisionService.getActiveService(accountNo);
+		ServiceInstanceOld serviceInstance = provisionService.getActiveService(accountNo);
 		return getAccountStatus(custId, accountNo, deviceId, serviceInstance.getExternalId());
 	}
 
@@ -797,7 +797,7 @@ public class TSCPMVNA {
 
 	@WebMethod
 	public List<KenanContract> getContracts(
-			Account account, ServiceInstance serviceInstance) {
+			Account account, ServiceInstanceOld serviceInstance) {
 		MethodLogger.logMethod("getContracts", account, serviceInstance);
 		List<KenanContract> contracts = contractService.getContracts(account, serviceInstance);
 		MethodLogger.logMethodExit("getContracts");
@@ -1064,7 +1064,7 @@ public class TSCPMVNA {
 
 	@WebMethod
 	public OldUsageSUmmary getUsageSummary(
-			Customer customer, ServiceInstance serviceInstance) {
+			Customer customer, ServiceInstanceOld serviceInstance) {
 		MethodLogger.logMethod("getUsageSummary", serviceInstance);
 		OldUsageSUmmary usage = new OldUsageSUmmary();
 		try {
@@ -1083,8 +1083,8 @@ public class TSCPMVNA {
 				for (CustAcctMapDAO custAcct : accountList) {
 					Account account = new Account();
 					account.setAccountNo(custAcct.getAccount_no());
-					List<ServiceInstance> serviceInstanceList = billService.getServiceInstanceList(account);
-					for (ServiceInstance si : serviceInstanceList) {
+					List<ServiceInstanceOld> serviceInstanceList = billService.getServiceInstanceList(account);
+					for (ServiceInstanceOld si : serviceInstanceList) {
 						if (si.getExternalId().equals(serviceInstance.getExternalId())) {
 							logger.trace("request is valid");
 							validRequest = true;
@@ -1175,7 +1175,7 @@ public class TSCPMVNA {
 			for (CustAcctMapDAO accountMap : accountList) {
 				logger.info("Updating all ServiceInstances for Account {} to threshold {}", accountMap.getAccount_no(), PROVISION.SERVICE.UPDATE);
 				account = billService.getAccountByAccountNo(accountMap.getAccount_no());
-				for (ServiceInstance serviceInstance : account.getServiceinstancelist()) {
+				for (ServiceInstanceOld serviceInstance : account.getServiceinstancelist()) {
 					logger.trace("Updating ServiceInstance {} on Account {} to threshold {}", serviceInstance.getExternalId(), account.getAccountNo(), PROVISION.SERVICE.UPDATE);
 					billService.updateServiceInstanceStatus(serviceInstance, PROVISION.SERVICE.UPDATE);
 				}
@@ -1314,7 +1314,7 @@ public class TSCPMVNA {
 			logger.info("Activate MDN");
 			activateService(customer, networkInfo);
 
-			ServiceInstance serviceInstance = new ServiceInstance();
+			ServiceInstanceOld serviceInstance = new ServiceInstanceOld();
 			serviceInstance.setExternalId(networkInfo.getMdn());
 
 			logger.info("Build Kenan Service Instance");
@@ -1363,7 +1363,7 @@ public class TSCPMVNA {
 				custId,
 				accountNo,
 				deviceId });
-		ServiceInstance serviceInstance = provisionService.getActiveService(accountNo);
+		ServiceInstanceOld serviceInstance = provisionService.getActiveService(accountNo);
 		logger.debug("   ...restoreAccount[{}] with MDN {}", accountNo, serviceInstance.getExternalId());
 		Component component = provisionService.getActiveComponent(accountNo, serviceInstance.getExternalId());
 		logger.debug("   ...restoreAccount[{}] with active component {} instance {}", new Object[] {
@@ -2100,7 +2100,7 @@ public class TSCPMVNA {
 			// update service instances with new cleared threshold value
 			logger.info("Updating service instances for account " + account.getAccountNo());
 			Account loadedAccount = billService.getAccountByAccountNo(account.getAccountNo());
-			for (ServiceInstance serviceInstance : loadedAccount.getServiceinstancelist()) {
+			for (ServiceInstanceOld serviceInstance : loadedAccount.getServiceinstancelist()) {
 				for (OldDevice tempDevice : deviceList) {
 					logger.info("Iterating through deviceInfoList");
 					List<DeviceAssociation> deviceAssociationList = customer.retrieveDeviceAssociationList(tempDevice.getId());
@@ -2161,7 +2161,7 @@ public class TSCPMVNA {
 				logger.info("Loading account information from Billing System...");
 				Account loadedAccount = billService.getAccountByAccountNo(account.getAccountNo());
 				logger.info("Updating service instances for account " + account.getAccountNo());
-				for (ServiceInstance serviceInstance : loadedAccount.getServiceinstancelist()) {
+				for (ServiceInstanceOld serviceInstance : loadedAccount.getServiceinstancelist()) {
 					logger.info("Updating threshold value and Network status for ServiceInstance " + serviceInstance.getExternalId() + " to " + PROVISION.SERVICE.HOTLINE);
 					if (deviceList != null && !deviceList.isEmpty()) {
 						for (OldDevice tempDevice : deviceList) {
@@ -2227,7 +2227,7 @@ public class TSCPMVNA {
 				custId,
 				accountNo,
 				deviceId });
-		ServiceInstance serviceInstance = provisionService.getActiveService(accountNo);
+		ServiceInstanceOld serviceInstance = provisionService.getActiveService(accountNo);
 		logger.debug("   ...suspendAccount[{}] with MDN {}", accountNo, serviceInstance.getExternalId());
 		Component component = provisionService.getActiveComponent(accountNo, serviceInstance.getExternalId());
 		logger.debug("   ...suspendAccount[{}] with active component {} instance {}", new Object[] {
@@ -2284,7 +2284,7 @@ public class TSCPMVNA {
 	}
 
 	protected void updateDeviceHistory(
-			int deviceId, String value, ServiceInstance serviceInstance, DeviceStatus status) {
+			int deviceId, String value, ServiceInstanceOld serviceInstance, DeviceStatus status) {
 		logger.info("updating device history for device {}:{} subscriber {} with status {}", new Object[] {
 				deviceId,
 				value,
@@ -2358,9 +2358,9 @@ public class TSCPMVNA {
 			}
 
 			try {
-				List<ServiceInstance> services = provisionService.getActiveServices(newDevice.getAccountNo());
-				ServiceInstance serviceInstance = null;
-				for (ServiceInstance si : services) {
+				List<ServiceInstanceOld> services = provisionService.getActiveServices(newDevice.getAccountNo());
+				ServiceInstanceOld serviceInstance = null;
+				for (ServiceInstanceOld si : services) {
 					if (si.getExternalId().equals(oldNetworkInfo.getMdn())) {
 						serviceInstance = si;
 					}

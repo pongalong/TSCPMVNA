@@ -13,7 +13,7 @@ import com.telscape.billingserviceinterface.PaymentHolder;
 import com.telscape.billingserviceinterface.UsageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
 import com.tscp.mvna.account.kenan.exception.KenanException;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 
 public class KenanGatewayService extends KenanGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(KenanGatewayService.class);
@@ -95,7 +95,7 @@ public class KenanGatewayService extends KenanGateway {
 	// TODO IMPLEMENT THESE METHODS PROPERLY
 
 	public UsageHolder getUnbilledUsageSummary(
-			ServiceInstance serviceInstance) {
+			ServiceInstanceOld serviceInstance) {
 		UsageHolder usageHolder = port.getUnbilledDataMBs(USERNAME, serviceInstance.getExternalId());
 		return usageHolder;
 	}

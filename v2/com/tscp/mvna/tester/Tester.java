@@ -2,7 +2,6 @@ package com.tscp.mvna.tester;
 
 import com.tscp.mvna.account.device.DeviceAndService;
 import com.tscp.mvna.account.device.network.service.NetworkGateway;
-import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.payment.PaymentHistory;
 import com.tscp.mvna.payment.PaymentRequest;
@@ -29,10 +28,10 @@ public class Tester {
 		DeviceAndService device = port.getDevice(24111);
 
 		try {
+			PaymentHistory paymentHistory = new PaymentHistory(device.getAccountNo());
+			paymentHistory.load();
 
-			PaymentHistory paymentHistory = AccountService.getPaymentHistory(device.getAccountNo());
-
-			for (PaymentRequest pr : paymentHistory.getPaymentRequests()) {
+			for (PaymentRequest pr : paymentHistory) {
 				if (pr.getPaymentResponse() != null) {
 					System.out.println(pr);
 					System.out.println("    " + pr.getPaymentResponse());

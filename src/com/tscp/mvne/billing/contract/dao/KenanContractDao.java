@@ -10,7 +10,7 @@ import org.hibernate.Transaction;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.contract.KenanContract;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 import com.tscp.mvne.exception.DaoException;
 import com.tscp.mvne.hibernate.GeneralSPResponse;
 
@@ -58,7 +58,7 @@ public class KenanContractDao {
 	}
 
 	public static List<KenanContract> getContracts(
-			Account account, ServiceInstance serviceInstance) throws DaoException {
+			Account account, ServiceInstanceOld serviceInstance) throws DaoException {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 		Transaction transaction = session.beginTransaction();
 		try {

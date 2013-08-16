@@ -5,7 +5,6 @@ import com.tscp.mvne.config.PROVISION;
 public class SuspendComponent extends ServiceComponent {
 
 	public SuspendComponent() {
-		super();
 		super.setId(PROVISION.COMPONENT.SUSPEND);
 	}
 

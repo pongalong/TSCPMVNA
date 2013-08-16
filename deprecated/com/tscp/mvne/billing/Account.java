@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.tscp.mvne.billing.provisioning.Package;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 
 @Deprecated
 // TODO jpong: Move address to a separate embedded class. This will affect TruConnect webfont as well.
@@ -27,7 +27,7 @@ public class Account implements Serializable {
 	private String lastName;
 	private String middleName;
 	private Collection<Package> packageList;
-	private Collection<ServiceInstance> serviceInstanceList;
+	private Collection<ServiceInstanceOld> serviceInstanceList;
 
 	public int getAccountNo() {
 		return accountNo;
@@ -93,7 +93,7 @@ public class Account implements Serializable {
 		return packageList;
 	}
 
-	public Collection<ServiceInstance> getServiceinstancelist() {
+	public Collection<ServiceInstanceOld> getServiceinstancelist() {
 		return serviceInstanceList;
 	}
 
@@ -178,7 +178,7 @@ public class Account implements Serializable {
 	}
 
 	public void setServiceinstancelist(
-			Collection<ServiceInstance> serviceinstancelist) {
+			Collection<ServiceInstanceOld> serviceinstancelist) {
 		this.serviceInstanceList = serviceinstancelist;
 	}
 

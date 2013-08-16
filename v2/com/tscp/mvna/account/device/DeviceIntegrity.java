@@ -65,10 +65,11 @@ public class DeviceIntegrity {
 				return;
 			}
 
-			if (sc.getServicePackage().getInstanceId() != sp.getInstanceId()) {
-				description = "ServiceComponent is not associated with ServicePackage";
-				return;
-			}
+			// TODO REIMPLEMENT THIS CHECK
+			// if (sc.getServicePackage().getInstanceId() != sp.getInstanceId()) {
+			// description = "ServiceComponent is not associated with ServicePackage";
+			// return;
+			// }
 
 			// MDN check
 			if (!si.getExternalId().equals(ni.getMdn())) {

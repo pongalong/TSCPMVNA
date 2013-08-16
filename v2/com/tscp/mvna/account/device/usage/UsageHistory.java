@@ -2,25 +2,21 @@ package com.tscp.mvna.account.device.usage;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.joda.time.DateTime;
-import org.joda.time.Period;
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tscp.mvna.TimeSensitive;
-import com.tscp.mvna.account.kenan.KenanAccount;
-import com.tscp.mvna.account.kenan.KenanObject;
-import com.tscp.mvna.account.kenan.provision.ServiceInstance;
+import com.tscp.mvna.account.kenan.TimeSensitiveKenanObjectCollection;
+import com.tscp.mvna.account.kenan.product.ServiceInstanceV2;
 import com.tscp.mvna.dao.Dao;
 
 @XmlRootElement
-public class UsageHistory implements KenanObject, TimeSensitive {
+public class UsageHistory extends TimeSensitiveKenanObjectCollection<UsageSession> {
+	private static final long serialVersionUID = 5564459631548588005L;
 	protected static final Logger logger = LoggerFactory.getLogger(UsageHistory.class);
-	private ServiceInstance serviceInstance;
-	private List<UsageSession> usageSessions;
+	private ServiceInstanceV2 serviceInstance;
 
 	/* **************************************************
 	 * Constructors
@@ -30,71 +26,38 @@ public class UsageHistory implements KenanObject, TimeSensitive {
 		// do nothing
 	}
 
-	public UsageHistory(List<UsageSession> usageSessions) {
-		this.usageSessions = usageSessions;
-		this.loaded = true;
-
-		if (usageSessions != null && !usageSessions.isEmpty()) {
-			UsageSession firstSession = usageSessions.get(0);
-			KenanAccount account = new KenanAccount();
-			account.setAccountNo(firstSession.getAccountNo());
-			serviceInstance = new ServiceInstance();
-			serviceInstance.setAccount(account);
-			serviceInstance.setExternalId(firstSession.getExternalId());
-		}
-	}
-
-	public UsageHistory(ServiceInstance serviceInstance) {
+	public UsageHistory(ServiceInstanceV2 serviceInstance) {
 		this.serviceInstance = serviceInstance;
 	}
 
-	/* **************************************************
-	 * Getter and Setter Methods
-	 */
+	public UsageHistory(List<UsageSession> usageSessions) {
+		super.addAll(usageSessions);
+		this.loaded = true;
 
-	@XmlElement
-	public List<UsageSession> getUsageSessions() {
-		if (usageSessions == null && !loaded)
-			refresh();
-		else if (loaded && isStale())
-			refresh();
-		return usageSessions;
-	}
-
-	public void setUsageSessions(
-			List<UsageSession> usageSessions) {
-		this.usageSessions = usageSessions;
+		// TODO check if there's a better way to set the account rather than building it from a UsageSession
+		if (usageSessions != null && !usageSessions.isEmpty()) {
+			UsageSession firstSession = usageSessions.get(0);
+			serviceInstance = new ServiceInstanceV2();
+			serviceInstance.setExternalId(firstSession.getExternalId());
+		}
 	}
 
 	/* **************************************************
 	 * Fetch Methods
 	 */
 
-	protected boolean loaded;
-
-	@Override
-	public boolean isLoaded() {
-		return loaded;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public void refresh() {
+	public List<UsageSession> loadValue() {
 		try {
-			usageSessions = Dao.list("fetch_usage_history", serviceInstance.getAccount().getAccountNo(), serviceInstance.getExternalId());
-		} catch (Exception e) {
-			logger.error("Error fetching usage history for {}", serviceInstance, e);
+			// TODO consider moving these fetches to a DeviceService class for better separation
+			return Dao.list("fetch_usage_history", serviceInstance.getServicePackage().getAccount().getAccountNo(), serviceInstance.getExternalId());
+		} catch (HibernateException e) {
+			logger.error("Error loading UsageHistory for", serviceInstance, e);
 		} finally {
 			loaded = true;
 		}
-	}
-
-	protected DateTime instantiationTime = new DateTime();
-
-	@Override
-	public boolean isStale() {
-		Period elapsed = new Period(instantiationTime, new DateTime());
-		return elapsed.getMinutes() > 15;
+		return null;
 	}
 
 }

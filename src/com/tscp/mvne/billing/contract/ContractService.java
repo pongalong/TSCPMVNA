@@ -6,7 +6,7 @@ import java.util.List;
 import com.tscp.mvne.billing.Account;
 import com.tscp.mvne.billing.contract.dao.KenanContractDao;
 import com.tscp.mvne.billing.contract.exception.ContractException;
-import com.tscp.mvne.billing.provisioning.ServiceInstance;
+import com.tscp.mvne.billing.provisioning.ServiceInstanceOld;
 
 public class ContractService {
 
@@ -28,7 +28,7 @@ public class ContractService {
     }
   }
 
-  public List<KenanContract> getContracts(Account account, ServiceInstance serviceInstance) throws ContractException {
+  public List<KenanContract> getContracts(Account account, ServiceInstanceOld serviceInstance) throws ContractException {
     return KenanContractDao.getContracts(account, serviceInstance);
   }
 

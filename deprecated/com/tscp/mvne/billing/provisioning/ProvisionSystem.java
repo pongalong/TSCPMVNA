@@ -178,10 +178,10 @@ public class ProvisionSystem extends OldBillService {
 		}
 	}
 
-	public List<ServiceInstance> getActiveServices(
+	public List<ServiceInstanceOld> getActiveServices(
 			int accountNumber) throws ProvisionException {
 		try {
-			List<ServiceInstance> results = new Vector<ServiceInstance>();
+			List<ServiceInstanceOld> results = new Vector<ServiceInstanceOld>();
 			ArrayOfServiceHolder services = port.getActiveService(USERNAME, Integer.toString(accountNumber));
 			if (services != null && services.getServiceHolder() != null && !services.getServiceHolder().isEmpty()) {
 				for (ServiceHolder serviceHolder : services.getServiceHolder()) {

@@ -1,7 +1,7 @@
 package com.tscp.mvna.account.kenan.service.account.defaults;
 
 import com.telscape.billingserviceinterface.CustAddress;
-import com.tscp.mvna.account.Address;
+import com.tscp.mvna.account.kenan.Address;
 import com.tscp.mvne.config.PROVISION;
 
 public class DefaultCustAddress extends CustAddress {

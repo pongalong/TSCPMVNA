@@ -1,4 +1,4 @@
-package com.tscp.mvna.account;
+package com.tscp.mvna.account.kenan;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tscp.mvna.account.kenan.KenanObject;
 import com.tscp.mvna.account.kenan.exception.ContactFetchException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 
@@ -19,7 +18,8 @@ import com.tscp.mvna.account.kenan.service.AccountService;
 		"email",
 		"phoneNumber",
 		"address" })
-public class Contact implements KenanObject {
+public class Contact extends KenanObject {
+	private static final long serialVersionUID = 5338029567070428920L;
 	protected static final Logger logger = LoggerFactory.getLogger(Contact.class);
 	protected int accountNo;
 	protected String firstName;
@@ -45,32 +45,38 @@ public class Contact implements KenanObject {
 	 * Fetch Methods
 	 */
 
-	protected boolean loaded;
-
 	@Override
-	public boolean isLoaded() {
-		return loaded;
+	public void reset() {
+		super.reset();
+		firstName = null;
+		middleName = null;
+		lastName = null;
+		phoneNumber = null;
+		email = null;
+		address = null;
 	}
 
 	@Override
-	public void refresh() {
-		Contact tmp;
+	public void load() {
+		Contact temp = loadValue();
+		firstName = temp.getFirstName();
+		middleName = temp.getMiddleName();
+		lastName = temp.getLastName();
+		phoneNumber = temp.getPhoneNumber();
+		email = temp.getEmail();
+		address = temp.getAddress();
+	}
+
+	@Override
+	protected Contact loadValue() {
 		try {
-			tmp = AccountService.getContact(accountNo);
-			if (tmp != null) {
-				firstName = tmp.getFirstName();
-				middleName = tmp.getMiddleName();
-				lastName = tmp.getLastName();
-				phoneNumber = tmp.getPhoneNumber();
-				email = tmp.getEmail();
-				address = AccountService.getAddress(accountNo);
-			}
+			return AccountService.getContact(accountNo);
 		} catch (ContactFetchException e) {
-			logger.error("Unable to fetch Contact for Account {}", accountNo);
+			logger.error("Error loading Contact for Account {}", accountNo);
 		} finally {
 			loaded = true;
-			tmp = null;
 		}
+		return null;
 	}
 
 	/* **************************************************

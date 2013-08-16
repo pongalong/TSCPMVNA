@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.ServiceHolder;
 import com.tscp.mvna.account.kenan.KenanAccount;
+import com.tscp.mvna.account.kenan.product.ServiceInstanceV2;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
@@ -22,6 +23,20 @@ public class ProvisionServiceInstanceService extends ProvisionService {
 	 * Fetch Methods
 	 */
 
+	public static List<ServiceInstanceV2> properGetActiveServices(
+			int accountNo) throws ProvisionFetchException {
+
+		List<ServiceInstanceV2> results = new ArrayList<ServiceInstanceV2>();
+
+		try {
+			for (ServiceHolder serviceHolder : checkResponse(port.getActiveService(USERNAME, Integer.toString(accountNo))))
+				results.add(ServiceInstanceV2.fromService(serviceHolder.getService()));
+			return results;
+		} catch (ProvisionException e) {
+			return null;
+		}
+	}
+
 	public static List<ServiceInstance> getActiveServices(
 			int accountNo) throws ProvisionFetchException {
 
@@ -29,7 +44,7 @@ public class ProvisionServiceInstanceService extends ProvisionService {
 
 		try {
 			for (ServiceHolder serviceHolder : checkResponse(port.getActiveService(USERNAME, Integer.toString(accountNo))))
-				results.add(new ServiceInstance(serviceHolder.getService()));
+				results.add(ServiceInstance.fromService(serviceHolder.getService()));
 			return results;
 		} catch (ProvisionException e) {
 			return null;
@@ -53,7 +68,7 @@ public class ProvisionServiceInstanceService extends ProvisionService {
 		reactivateAccount(account);
 
 		try {
-			checkResponse(port.addService(USERNAME, serviceInstance.toBillingService()));
+			checkResponse(port.addService(USERNAME, ServiceInstance.toBillingService(serviceInstance, account)));
 			return serviceInstance;
 		} catch (Exception e) {
 			logger.error("Unable to connect {} with {}", account, serviceInstance, e);

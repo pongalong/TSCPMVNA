@@ -53,10 +53,6 @@ public class Account extends KenanAccount implements Serializable {
 	@XmlTransient
 	public void connect(
 			ServiceInstance serviceInstance) throws AccountConnectException {
-
-		if (serviceInstance.getAccount() != this)
-			serviceInstance.setAccount(this);
-
 		try {
 			getService().connect(serviceInstance);
 		} catch (ProvisionException e) {

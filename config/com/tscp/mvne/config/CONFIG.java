@@ -13,6 +13,7 @@ import com.tscp.mvna.ws.exception.InitializationException;
 public class CONFIG {
 	public static String clientName = "WOTG";
 	public static boolean enableProfiling = true;
+	public static int defaultStaleTime = 15;
 	
 	public static final String configFile = "com/tscp/mvne/config/config.properties";
 	public static final String connectionFile = "com/tscp/mvne/config/service.properties";

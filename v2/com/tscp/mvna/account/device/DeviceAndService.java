@@ -19,8 +19,8 @@ import com.tscp.mvna.account.device.network.exception.RestoreException;
 import com.tscp.mvna.account.device.network.exception.SuspendException;
 import com.tscp.mvna.account.exception.AccountRestoreException;
 import com.tscp.mvna.account.exception.AccountSuspendException;
-import com.tscp.mvna.account.kenan.Service;
 import com.tscp.mvna.account.kenan.exception.AccountDisconnectException;
+import com.tscp.mvna.account.kenan.provision.Service;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 
 @Entity
@@ -51,7 +51,7 @@ public class DeviceAndService extends Device implements Serializable {
 			throw new ConnectException("Account is null and cannot be connected");
 
 		try {
-			getAccount().connect(new ServiceInstance(getAccount(), getNetworkInfo()));
+			getAccount().connect(new ServiceInstance(getNetworkInfo()));
 		} catch (Exception e) {
 			try {
 				super.disconnect();

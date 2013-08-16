@@ -109,7 +109,7 @@ public class PaymentService extends PaymentGateway {
 		if (!paymentResponse.isSuccess())
 			return null;
 
-		PaymentRecord paymentRecord = AccountService.addPayment_sp(paymentResponse);
+		PaymentRecord paymentRecord = AccountService.addPayment(paymentResponse);
 
 		try {
 			Dao.save(paymentRecord);

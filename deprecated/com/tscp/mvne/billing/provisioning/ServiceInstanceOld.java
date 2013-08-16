@@ -3,7 +3,7 @@ package com.tscp.mvne.billing.provisioning;
 import java.io.Serializable;
 import java.util.Date;
 
-public class ServiceInstance implements Serializable {
+public class ServiceInstanceOld implements Serializable {
 	private static final long serialVersionUID = 8814958679258867200L;
 	private int subscriberNumber;
 	private int externalIdType;
@@ -11,7 +11,7 @@ public class ServiceInstance implements Serializable {
 	private Date activeDate;
 	private Date inactiveDate;
 
-	public ServiceInstance() {
+	public ServiceInstanceOld() {
 		// do nothing
 	}
 

@@ -138,7 +138,7 @@ public final class ProvisionUtil extends BillingUtil {
 	}
 
 	public static final Service buildService(
-			int accountNo, ServiceInstance serviceInstance) {
+			int accountNo, ServiceInstanceOld serviceInstance) {
 		Service service = new Service();
 		service.setAccountNo(Integer.toString(accountNo));
 		service.setActiveDate(toServiceDate(serviceInstance.getActiveDate()));
@@ -149,9 +149,9 @@ public final class ProvisionUtil extends BillingUtil {
 		return service;
 	}
 
-	public static final ServiceInstance buildServiceInstance(
+	public static final ServiceInstanceOld buildServiceInstance(
 			Service service) {
-		ServiceInstance serviceInstance = new ServiceInstance();
+		ServiceInstanceOld serviceInstance = new ServiceInstanceOld();
 		serviceInstance.setActiveDate(getServiceDate(service.getActiveDate()));
 		serviceInstance.setExternalId(service.getExternalId());
 		serviceInstance.setExternalIdType(service.getExternalIdType());

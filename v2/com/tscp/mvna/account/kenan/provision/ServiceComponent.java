@@ -9,29 +9,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.PkgComponent;
+import com.tscp.mvna.account.kenan.KenanObject;
 import com.tscp.mvna.account.kenan.provision.service.ProvisionService;
 import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultPkgComponent;
 import com.tscp.util.DateUtils;
 
 @XmlRootElement
-public class ServiceComponent {
+public class ServiceComponent extends KenanObject {
+	private static final long serialVersionUID = -7131375586432560540L;
 	protected static final Logger logger = LoggerFactory.getLogger(ServiceComponent.class);
-	protected ServicePackage servicePackage;
 	protected int instanceId;
 	protected int id;
 	protected String name;
 	protected String externalId;
-	protected DateTime activeDate;
+	protected DateTime activeDate = new DateTime();
 	protected DateTime inactiveDate;
 
-	public ServiceComponent() {
-		activeDate = new DateTime();
+	/* **************************************************
+	 * Constructors
+	 */
+
+	protected ServiceComponent() {
+		// do nothing
 	}
 
 	public ServiceComponent(ServiceComponent component) {
-		this();
-		this.setExternalId(component.getExternalId());
-		this.setServicePackage(component.getServicePackage());
+		this.externalId = component.getExternalId();
 	}
 
 	/* **************************************************
@@ -56,16 +59,6 @@ public class ServiceComponent {
 	public void setInstanceId(
 			int instanceId) {
 		this.instanceId = instanceId;
-	}
-
-	@XmlTransient
-	public ServicePackage getServicePackage() {
-		return servicePackage;
-	}
-
-	public void setServicePackage(
-			ServicePackage servicePackage) {
-		this.servicePackage = servicePackage;
 	}
 
 	@XmlAttribute
@@ -129,34 +122,33 @@ public class ServiceComponent {
 	 * Adaptor Methods for KenanGateway Objects
 	 */
 
-	public ServiceComponent(PkgComponent billingComponent) {
-		instanceId = billingComponent.getComponentInstanceId();
-		id = billingComponent.getComponentId();
-		name = billingComponent.getComponentName();
-		externalId = billingComponent.getExternalId();
+	public static final ServiceComponent fromPkgComponent(
+			PkgComponent billingComponent) {
 
-		// set dates
+		ServiceComponent serviceComponent = new ServiceComponent();
+		serviceComponent.setInstanceId(billingComponent.getComponentInstanceId());
+		serviceComponent.setId(billingComponent.getComponentId());
+		serviceComponent.setName(billingComponent.getComponentName());
+		serviceComponent.setExternalId(billingComponent.getExternalId());
+
 		if (billingComponent.getComponentActiveDate() != null && !ProvisionService.isNullDate(billingComponent.getComponentActiveDate()))
-			activeDate = new DateTime(billingComponent.getComponentActiveDate().toGregorianCalendar());
+			serviceComponent.setActiveDate(new DateTime(billingComponent.getComponentActiveDate().toGregorianCalendar()));
 		if (billingComponent.getDiscDate() != null && !ProvisionService.isNullDate(billingComponent.getDiscDate()))
-			inactiveDate = new DateTime(billingComponent.getDiscDate().toGregorianCalendar());
+			serviceComponent.setInactiveDate(new DateTime(billingComponent.getDiscDate().toGregorianCalendar()));
 
-		// set package
-		if (servicePackage == null && billingComponent.getPackageInstanceId() > 0) {
-			servicePackage = new ServicePackage();
-			servicePackage.setInstanceId(billingComponent.getPackageInstanceId());
-		}
+		return serviceComponent;
 	}
 
-	@XmlTransient
-	public PkgComponent toPkgComponent() {
+	public static final PkgComponent toPkgComponent(
+			ServiceComponent serviceComponent, ServicePackage servicePackage) {
+
 		PkgComponent result = new DefaultPkgComponent();
-		result.setExternalId(getExternalId());
-		result.setComponentId(getId());
-		result.setComponentInstanceId(getInstanceId());
-		result.setComponentName(getName());
-		result.setComponentActiveDate(DateUtils.getXMLCalendar(getActiveDate()));
-		result.setDiscDate(DateUtils.getXMLCalendar(getInactiveDate()));
+		result.setExternalId(serviceComponent.getExternalId());
+		result.setComponentId(serviceComponent.getId());
+		result.setComponentInstanceId(serviceComponent.getInstanceId());
+		result.setComponentName(serviceComponent.getName());
+		result.setComponentActiveDate(DateUtils.getXMLCalendar(serviceComponent.getActiveDate()));
+		result.setDiscDate(DateUtils.getXMLCalendar(serviceComponent.getInactiveDate()));
 
 		if (servicePackage != null) {
 			result.setPackageInstanceId(servicePackage.getInstanceId());
@@ -174,6 +166,17 @@ public class ServiceComponent {
 
 	@Override
 	public String toString() {
-		return "ServiceComponent [id=" + id + ", externalId=" + externalId + ", instanceId=" + instanceId + "]";
+		return "ServiceComponent [id=" + id + ", externalId=" + externalId + ", name=" + name + ", instanceId=" + instanceId + "]";
 	}
+
+	@Override
+	public void load() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+	}
+
+	@Override
+	protected Object loadValue() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+	}
+
 }

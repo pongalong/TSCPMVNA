@@ -9,8 +9,8 @@ public class InstallComponent extends ServiceComponent {
 		super.setId(PROVISION.COMPONENT.INSTALL);
 	}
 
-	public InstallComponent(ServiceInstance serviceInstance) {
-		super(serviceInstance);
+	public InstallComponent(ServiceInstance serviceInstance, ServicePackage servicePackage) {
+		super(serviceInstance, servicePackage);
 		super.setId(PROVISION.COMPONENT.INSTALL);
 	}
 }

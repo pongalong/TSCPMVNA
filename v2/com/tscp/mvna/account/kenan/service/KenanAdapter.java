@@ -1,6 +1,8 @@
 package com.tscp.mvna.account.kenan.service;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.BillingService;
 import com.telscape.billingserviceinterface.Package;
@@ -16,9 +18,11 @@ import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultBillingServ
 import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultPkgComponent;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultBillingName;
 import com.tscp.mvna.account.kenan.service.account.defaults.DefaultCustAddress;
+import com.tscp.util.ClassUtils;
 import com.tscp.util.DateUtils;
 
 public final class KenanAdapter {
+	private static final Logger logger = LoggerFactory.getLogger(KenanAdapter.class);
 
 	private KenanAdapter() {
 		// prevent instantiation
@@ -85,10 +89,12 @@ public final class KenanAdapter {
 		if (serviceComponent.getServicePackage() != null) {
 			result.setPackageInstanceId(serviceComponent.getServicePackage().getInstanceId());
 			result.setPackageId(serviceComponent.getServicePackage().getId());
-			result.setPackageInstanceIdServ(serviceComponent.getServicePackage().getServerId().shortValue());
+			// result.setPackageInstanceIdServ(serviceComponent.getServicePackage().getServerId().shortValue());
 			result.setPackageName(serviceComponent.getServicePackage().getName());
 			result.setPackageActiveDate(DateUtils.getXMLCalendar(serviceComponent.getServicePackage().getActiveDate()));
 		}
+
+		logger.debug("result is {}", ClassUtils.toString(result));
 
 		// this is an unused property since only active components are important
 		// the disconnect reason should always be the same and is only used when disconnecting

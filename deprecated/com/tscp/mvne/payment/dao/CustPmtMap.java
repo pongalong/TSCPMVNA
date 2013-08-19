@@ -5,8 +5,8 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import com.tscp.mvna.dao.GeneralSPResponse;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
-import com.tscp.mvne.hibernate.GeneralSPResponse;
 import com.tscp.mvne.payment.PaymentException;
 
 @Deprecated

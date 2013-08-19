@@ -222,7 +222,31 @@ public class Dao {
 		return result;
 	}
 
-	public static Object uniqueResultScalar(
+	public static Object[] listScalar(
+			String queryName, Object... args) {
+
+		Session session = getSession();
+		Transaction tx = session.beginTransaction();
+
+		PreparedQuery preparedQuery = new PreparedQuery(session.getNamedQuery(queryName), args);
+		Object[] result = null;
+
+		try {
+			profiler.start(queryName);
+			result = (Object[]) preparedQuery.uniqueResult();
+			tx.commit();
+		} catch (HibernateException e) {
+			logger.error("Error executing named query {}: {} : {}", queryName, e.getMessage(), e.getCause());
+			tx.rollback();
+		} finally {
+			closeSession(session);
+			profiler.stop();
+		}
+
+		return result;
+	}
+
+	public static Object uniqueResult(
 			String queryName, Object... args) {
 
 		Session session = getSession();
@@ -246,18 +270,17 @@ public class Dao {
 		return result;
 	}
 
-	public static Object[] listScalar(
+	public static int executeUpdate(
 			String queryName, Object... args) {
-
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
 
 		PreparedQuery preparedQuery = new PreparedQuery(session.getNamedQuery(queryName), args);
-		Object[] result = null;
+		int result = -1;
 
 		try {
 			profiler.start(queryName);
-			result = (Object[]) preparedQuery.uniqueResult();
+			result = preparedQuery.executeUpdate();
 			tx.commit();
 		} catch (HibernateException e) {
 			logger.error("Error executing named query {}: {} : {}", queryName, e.getMessage(), e.getCause());

@@ -10,6 +10,7 @@ public class DefaultPkgComponent extends PkgComponent {
 		setComponentId(PROVISION.COMPONENT.INSTALL);
 		setPackageId(PROVISION.COMPONENT.PACKAGE_ID);
 		setPackageInstanceId(PROVISION.PACKAGE.INSTANCE_ID.shortValue());
+		System.out.println("SETTING PACKAGE INSTANCE ID SERV TO : " + PROVISION.PACKAGE.INSTANCE_SERV_ID.shortValue());
 		setPackageInstanceIdServ(PROVISION.PACKAGE.INSTANCE_SERV_ID.shortValue());
 		setComponentActiveDate(DateUtils.getXMLCalendar());
 		setExternalId("");

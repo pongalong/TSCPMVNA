@@ -1,7 +1,7 @@
 package com.tscp.mvna.account.kenan;
 
+import com.tscp.mvna.account.contract.exception.ContractException;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
-import com.tscp.mvne.billing.contract.exception.ContractException;
 
 public class Contract {
 	private KenanAccount account;

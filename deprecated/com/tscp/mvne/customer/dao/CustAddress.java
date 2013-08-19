@@ -6,9 +6,9 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import com.tscp.mvna.dao.GeneralSPResponse;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvne.customer.CustomerException;
-import com.tscp.mvne.hibernate.GeneralSPResponse;
 
 @Deprecated
 @SuppressWarnings("unchecked")

@@ -40,6 +40,7 @@
 
     <mapping class="com.tscp.mvna.account.Account" />
     <mapping class="com.tscp.mvna.account.UnlinkedAccount" />
+    <mapping class="com.tscp.mvna.account.contract.Contract" />
 
     <mapping class="com.tscp.mvna.account.device.Device" />
     <mapping class="com.tscp.mvna.account.device.DeviceAndService" />

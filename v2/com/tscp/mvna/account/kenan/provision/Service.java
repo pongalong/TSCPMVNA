@@ -24,6 +24,7 @@ import com.tscp.mvne.config.PROVISION;
 public class Service extends ServiceInstance {
 	private static final long serialVersionUID = -5194651460015202188L;
 	private static final Logger logger = LoggerFactory.getLogger(Service.class);
+	private ServiceValidator validator;
 
 	public Service(KenanAccount account) {
 		super(account);
@@ -31,6 +32,14 @@ public class Service extends ServiceInstance {
 
 	public Service(NetworkInfo networkInfo) {
 		super(networkInfo);
+	}
+
+	public ServiceValidator getValidator() {
+		if (validator == null) {
+			validator = new ServiceValidator(this);
+			validator.validate();
+		}
+		return validator;
 	}
 
 	protected void refresh() {
@@ -70,15 +79,6 @@ public class Service extends ServiceInstance {
 	 * Provisioning Methods
 	 */
 
-	public void integrityCheck() throws ServiceIntegrityException {
-		if (account == null)
-			throw new ServiceIntegrityException("Service has no account");
-		if (serviceComponents == null)
-			throw new ServiceIntegrityException("Sevice has no active ServiceComponent");
-		if (serviceComponents.size() > 1)
-			throw new ServiceIntegrityException("Sevice has more than one active ServiceComponent");
-	}
-
 	public void connect() throws ServiceIntegrityException, ServiceConnectException, ProvisionException {
 
 		if (account == null || account.getAccountNo() == 0)
@@ -107,27 +107,40 @@ public class Service extends ServiceInstance {
 	}
 
 	public void disconnect() throws ServiceIntegrityException, ServiceDisconnectException, ProvisionException {
-		integrityCheck();
+		getValidator().validate();
+		if (!getValidator().isSane())
+			throw new ServiceIntegrityException("Service failed integrity check: " + getValidator().getProblems());
 		ServiceInstanceProvisioner.removeServiceInstance(this);
 		refresh();
 	}
 
 	public void restore() throws ServiceIntegrityException, ServiceRestoreException, ProvisionException {
-		integrityCheck();
+		getValidator().validate();
+		if (!getValidator().isSane())
+			throw new ServiceIntegrityException("Service failed integrity check: " + getValidator().getProblems());
 		if (getActiveComponent().getId() != PROVISION.COMPONENT.SUSPEND)
 			throw new ServiceRestoreException("Service cannot be restored: ServiceComponent is not SUSPEND");
+
+		ServiceComponent restoreComponent = getActiveComponent().isCurrentMonth() ? new ReinstallComponent(getActiveComponent().getServiceInstance(), getActiveComponent().getServicePackage()) : new InstallComponent(getActiveComponent().getServiceInstance(), getActiveComponent().getServicePackage());
+
+		logger.debug("adding with package {}", getActiveComponent().getServicePackage());
+		logger.debug("adding with service {}", getActiveComponent().getServiceInstance());
+		logger.debug("component is {}", restoreComponent);
+
 		ServiceComponentProvisioner.removeComponent(getActiveComponent());
-		ServiceComponentProvisioner.addComponent(getActiveComponent().isCurrentMonth() ? new ReinstallComponent(getActiveComponent().getServiceInstance()) : new InstallComponent(getActiveComponent().getServiceInstance()));
+		ServiceComponentProvisioner.addComponent(restoreComponent);
 		refresh();
 	}
 
 	@XmlTransient
 	public void suspend() throws ServiceIntegrityException, ServiceSuspendException, ProvisionException {
-		integrityCheck();
+		getValidator().validate();
+		if (!getValidator().isSane())
+			throw new ServiceIntegrityException("Service failed integrity check: " + getValidator().getProblems());
 		if (!getActiveComponent().isActiveType())
 			throw new ServiceSuspendException("Service cannot be suspended: ServiceComponent is not ACTIVE");
 		ServiceComponentProvisioner.removeComponent(getActiveComponent());
-		ServiceComponentProvisioner.addFutureComponent(new SuspendComponent(getActiveComponent().getServiceInstance()));
+		ServiceComponentProvisioner.addFutureComponent(new SuspendComponent(getActiveComponent().getServiceInstance(), getActiveComponent().getServicePackage()));
 		refresh();
 	}
 

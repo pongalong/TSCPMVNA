@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tscp.mvna.account.device.usage.OldUsageDetail;
+import com.tscp.mvna.dao.GeneralSPResponse;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvna.payment.method.manager.CreditCardManager;
 import com.tscp.mvne.billing.Account;
@@ -21,7 +22,6 @@ import com.tscp.mvne.customer.dao.CustInfo;
 import com.tscp.mvne.customer.dao.CustTopUp;
 import com.tscp.mvne.device.DeviceAssociation;
 import com.tscp.mvne.device.OldDevice;
-import com.tscp.mvne.hibernate.GeneralSPResponse;
 import com.tscp.mvne.payment.OldPaymentInformation;
 import com.tscp.mvne.payment.PaymentException;
 import com.tscp.mvne.payment.PaymentType;

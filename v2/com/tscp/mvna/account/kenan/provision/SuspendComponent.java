@@ -9,8 +9,8 @@ public class SuspendComponent extends ServiceComponent {
 		super.setId(PROVISION.COMPONENT.SUSPEND);
 	}
 
-	public SuspendComponent(ServiceInstance serviceInstance) {
-		super(serviceInstance);
+	public SuspendComponent(ServiceInstance serviceInstance, ServicePackage servicePackage) {
+		super(serviceInstance, servicePackage);
 		super.setId(PROVISION.COMPONENT.SUSPEND);
 	}
 

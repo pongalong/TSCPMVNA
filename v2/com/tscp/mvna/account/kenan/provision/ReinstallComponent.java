@@ -9,8 +9,8 @@ public class ReinstallComponent extends ServiceComponent {
 		super.setId(PROVISION.COMPONENT.REINSTALL);
 	}
 
-	public ReinstallComponent(ServiceInstance serviceInstance) {
-		super(serviceInstance);
+	public ReinstallComponent(ServiceInstance serviceInstance, ServicePackage servicePackage) {
+		super(serviceInstance, servicePackage);
 		super.setId(PROVISION.COMPONENT.REINSTALL);
 	}
 

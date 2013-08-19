@@ -27,4 +27,9 @@ public class Problem {
 		this.description = description;
 	}
 
+	@Override
+	public String toString() {
+		return "Problem [" + description + "]";
+	}
+
 }

@@ -27,7 +27,7 @@ import com.tscp.mvna.account.kenan.provision.Service;
 public class DeviceAndService extends Device implements Serializable {
 	protected static final Logger logger = LoggerFactory.getLogger(DeviceAndService.class);
 	private static final long serialVersionUID = -901253807496034420L;
-	private DeviceIntegrity integrity;
+	private DeviceValidator validator;
 
 	/* **************************************************
 	 * Status Methods
@@ -133,12 +133,12 @@ public class DeviceAndService extends Device implements Serializable {
 
 	@Transient
 	@XmlElement
-	public DeviceIntegrity getIntegrity() {
-		if (integrity == null) {
-			integrity = new DeviceIntegrity(this);
-			integrity.check();
+	public DeviceValidator getValidator() {
+		if (validator == null) {
+			validator = new DeviceValidator(this);
+			validator.validate();
 		}
-		return integrity;
+		return validator;
 	}
 
 	/* **************************************************

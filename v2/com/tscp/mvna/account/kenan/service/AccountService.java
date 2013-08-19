@@ -156,7 +156,7 @@ public class AccountService extends KenanGatewayService {
 		PaymentRecord paymentRecord = new PaymentRecord(paymentResponse);
 		paymentRecord.setRecordDate(new DateTime());
 		String amount = PaymentService.stringFormatter.print(paymentResponse.getPaymentRequest().getAmount()).replace(".", "");
-		int trackingId = (int) Dao.uniqueResultScalar("save_payment_record", paymentResponse.getPaymentRequest().getAccountNo(), amount, paymentRecord.getRecordDate().toDate());
+		int trackingId = (int) Dao.uniqueResult("save_payment_record", paymentResponse.getPaymentRequest().getAccountNo(), amount, paymentRecord.getRecordDate().toDate());
 		paymentRecord.setTrackingId(trackingId);
 		return paymentRecord;
 	}

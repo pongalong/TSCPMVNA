@@ -24,7 +24,7 @@ import com.tscp.util.profiler.Profiler;
 public abstract class NetworkGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(NetworkGateway.class);
 	private static final API3Service service = loadService();
-	private static final API3 port = service.getAPI3Port();
+	private static final API3 port = getInstance();
 	private static final Method[] portMethods = port.getClass().getMethods();
 
 	/**
@@ -50,6 +50,7 @@ public abstract class NetworkGateway {
 	 * @return
 	 */
 	public static final API3 getInstance() {
+		API3 port = service.getAPI3Port();
 		Map<String, Object> requestContext = ((BindingProvider) port).getRequestContext();
 		requestContext.put(BindingProviderProperties.REQUEST_TIMEOUT, 180000);
 		requestContext.put(BindingProviderProperties.CONNECT_TIMEOUT, 180000);

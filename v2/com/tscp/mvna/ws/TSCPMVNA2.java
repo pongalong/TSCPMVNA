@@ -22,8 +22,13 @@ import com.tscp.mvna.account.kenan.exception.PaymentFetchException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.dao.Dao;
 import com.tscp.mvna.payment.PaymentHistory;
+import com.tscp.mvna.payment.PaymentRecord;
+import com.tscp.mvna.payment.PaymentRequest;
+import com.tscp.mvna.payment.PaymentResponse;
 import com.tscp.mvna.payment.PaymentTransaction;
+import com.tscp.mvna.payment.exception.PaymentServiceException;
 import com.tscp.mvna.payment.method.CreditCard;
+import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvna.user.Customer;
 import com.tscp.mvna.user.User;
 
@@ -131,10 +136,13 @@ public class TSCPMVNA2 {
 
 	@WebMethod
 	public PaymentTransaction submitTopup(
-			DeviceAndService device) {
+			DeviceAndService device) throws PaymentServiceException {
 		device = getDevice(device.getId());
 
-		// TODO finish implementation in PaymentService
+		PaymentTransaction tx = PaymentService.beginTransaction(device);
+		PaymentRequest request = PaymentService.submitRequest(tx);
+		PaymentResponse response = PaymentService.submitPayment(tx);
+		PaymentRecord record = PaymentService.submitRecord(tx);
 
 		return null;
 	}

@@ -39,8 +39,9 @@ public class ServiceComponent extends KenanObject {
 		serviceInstance.setExternalId(externalId);
 	}
 
-	public ServiceComponent(ServiceInstance serviceInstance) {
+	public ServiceComponent(ServiceInstance serviceInstance, ServicePackage servicePackage) {
 		this.serviceInstance = serviceInstance;
+		this.servicePackage = servicePackage;
 	}
 
 	/* **************************************************

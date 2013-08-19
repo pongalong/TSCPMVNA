@@ -8,9 +8,9 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.dao.GeneralSPResponse;
 import com.tscp.mvna.dao.hibernate.HibernateUtil;
 import com.tscp.mvne.customer.CustomerException;
-import com.tscp.mvne.hibernate.GeneralSPResponse;
 
 @SuppressWarnings("unchecked")
 public class CustTopUp implements Serializable {

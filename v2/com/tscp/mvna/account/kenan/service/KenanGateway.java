@@ -20,7 +20,7 @@ import com.tscp.mvne.config.CONNECTION;
 public abstract class KenanGateway {
 	protected static final Logger logger = LoggerFactory.getLogger(KenanGateway.class);
 	protected static final BillingServiceInterface service = loadService();
-	protected static final BillingServiceInterfaceSoap port = service.getBillingServiceInterfaceSoap();
+	protected static final BillingServiceInterfaceSoap port = getInstance();
 
 	/**
 	 * Loads and returns the billing interface.
@@ -45,6 +45,7 @@ public abstract class KenanGateway {
 	 * @return
 	 */
 	protected static final BillingServiceInterfaceSoap getInstance() {
+		BillingServiceInterfaceSoap port = service.getBillingServiceInterfaceSoap();
 		Map<String, Object> requestContext = ((BindingProvider) port).getRequestContext();
 		requestContext.put(BindingProviderProperties.REQUEST_TIMEOUT, 180000);
 		requestContext.put(BindingProviderProperties.CONNECT_TIMEOUT, 180000);

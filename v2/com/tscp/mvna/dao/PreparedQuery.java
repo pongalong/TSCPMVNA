@@ -30,12 +30,17 @@ public class PreparedQuery {
 			query.setParameter(sortedParams.get(i), args[i]);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public List list() {
 		return query.list();
 	}
 
 	public Object uniqueResult() {
 		return query.uniqueResult();
+	}
+
+	public int executeUpdate() {
+		return query.executeUpdate();
 	}
 
 }

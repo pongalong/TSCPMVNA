@@ -14,9 +14,11 @@ public class Tester {
 		try {
 
 			DeviceAndService device = port.getDevice(24111);
-			for (Problem p : device.getIntegrity().getProblemObjects()) {
-				System.out.println(p.getDescription());
-			}
+			if (!device.getValidator().isSane())
+				for (Problem p : device.getValidator().getProblems())
+					System.out.println(p.getDescription());
+
+			port.submitTopup(device);
 
 			// PaymentHistory paymentHistory = new PaymentHistory(device.getAccountNo());
 			// paymentHistory.load();
@@ -44,11 +46,11 @@ public class Tester {
 			System.err.println("Global Exception caught: " + e.getMessage());
 		} finally {
 			System.out.println("***Payment Gateway Statistics***");
-			System.out.println(PaymentGateway.getProfiler().getResultMap());
+			System.out.println("   " + PaymentGateway.getProfiler().getResultMap());
 			System.out.println("***Network Gateway Statistics***");
-			System.out.println(NetworkGateway.getProfiler().getResultMap());
+			System.out.println("   " + NetworkGateway.getProfiler().getResultMap());
 			System.out.println("***DAO Statistics***");
-			System.out.println(Dao.getProfiler().getResultMap());
+			System.out.println("   " + Dao.getProfiler().getResultMap());
 			System.out.println("\nGoodbye world!");
 		}
 	}

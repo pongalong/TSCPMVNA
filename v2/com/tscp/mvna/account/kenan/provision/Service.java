@@ -1,15 +1,13 @@
 package com.tscp.mvna.account.kenan.provision;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.account.device.network.NetworkInfo;
 import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
@@ -18,348 +16,119 @@ import com.tscp.mvna.account.kenan.provision.exception.ServiceDisconnectExceptio
 import com.tscp.mvna.account.kenan.provision.exception.ServiceIntegrityException;
 import com.tscp.mvna.account.kenan.provision.exception.ServiceRestoreException;
 import com.tscp.mvna.account.kenan.provision.exception.ServiceSuspendException;
-import com.tscp.mvna.account.kenan.provision.service.ProvisionServiceComponentService;
-import com.tscp.mvna.account.kenan.provision.service.ProvisionServiceInstanceService;
-import com.tscp.mvna.account.kenan.provision.service.ProvisionServicePackageService;
+import com.tscp.mvna.account.kenan.provision.service.ServiceComponentProvisioner;
+import com.tscp.mvna.account.kenan.provision.service.ServiceInstanceProvisioner;
+import com.tscp.mvna.account.kenan.provision.service.ServicePackageProvisioner;
 import com.tscp.mvne.config.PROVISION;
 
-@XmlRootElement
-public class Service {
-	protected static final Logger logger = LoggerFactory.getLogger(Service.class);
-
-	protected KenanAccount account;
-	protected List<ServiceInstance> serviceInstances;
-	protected List<ServicePackage> servicePackages;
-	protected List<ServiceComponent> serviceComponents;
-
-	protected boolean loadedServiceInstances;
-	protected boolean loadedServicePackages;
-	protected boolean loadedServiceComponents;
-
-	/* **************************************************
-	 * Constructors
-	 */
-
-	protected Service() {
-		// do nothing
-	}
+public class Service extends ServiceInstance {
+	private static final long serialVersionUID = -5194651460015202188L;
+	private static final Logger logger = LoggerFactory.getLogger(Service.class);
 
 	public Service(KenanAccount account) {
-		this.account = account;
+		super(account);
 	}
 
-	public Service(KenanAccount account, ServiceInstance newServiceInstance) throws ServiceConnectException {
-		this.account = account;
-		serviceInstances = new ArrayList<ServiceInstance>();
-		serviceInstances.add(newServiceInstance);
+	public Service(NetworkInfo networkInfo) {
+		super(networkInfo);
+	}
+
+	protected void refresh() {
+		loaded = false;
+		serviceComponents = null;
+	}
+
+	@Override
+	public void load() {
+		try {
+			List<ServiceInstance> result = ServiceInstanceProvisioner.getActiveServices(account);
+			if (result == null || result.isEmpty())
+				logger.warn("{} has no active ServiceInstance", this);
+			if (result.size() > 1)
+				logger.warn("{} has more than one active ServicePackage", this);
+
+			if (account == null || account.getAccountNo() != result.get(0).getAccount().getAccountNo())
+				logger.warn("{} does not match returned Account {}", this, result.get(0).getAccount());
+
+			account = result.get(0).getAccount();
+			subscriberNo = result.get(0).getSubscriberNo();
+			externalIdType = result.get(0).getExternalIdType();
+			externalId = result.get(0).getExternalId();
+			activeDate = result.get(0).getActiveDate();
+			inactiveDate = result.get(0).getInactiveDate();
+			serviceComponents = result.get(0).getServiceComponents();
+
+			super.load();
+		} catch (ProvisionFetchException e) {
+			logger.error("Error loading ServiceInstances for {}", this, e);
+		} finally {
+			loaded = true;
+		}
 	}
 
 	/* **************************************************
-	 * Provision Methods
+	 * Provisioning Methods
 	 */
 
-	@XmlTransient
-	public void connect(
-			ServiceInstance newServiceInstance) throws ServiceConnectException, ProvisionException {
+	public void integrityCheck() throws ServiceIntegrityException {
+		if (account == null)
+			throw new ServiceIntegrityException("Service has no account");
+		if (serviceComponents == null)
+			throw new ServiceIntegrityException("Sevice has no active ServiceComponent");
+		if (serviceComponents.size() > 1)
+			throw new ServiceIntegrityException("Sevice has more than one active ServiceComponent");
+	}
 
-		if (newServiceInstance == null)
-			throw new ServiceConnectException("Account cannot be connected: ServiceInstance is null");
+	public void connect() throws ServiceIntegrityException, ServiceConnectException, ProvisionException {
 
-		// force loading of services for integrity
+		if (account == null || account.getAccountNo() == 0)
+			throw new ServiceConnectException("Account must be provided");
+
 		refresh();
 
-		if (hasServiceInstances()) {
-			for (ServiceInstance si : getServiceInstances())
-				if (si.getExternalId().equals(newServiceInstance.getExternalId()))
-					throw new ServiceConnectException(this + " already contains ServiceInstance " + newServiceInstance.getExternalId());
-			throw new ServiceConnectException(this + " already has an active ServiceInstance " + getActiveServiceInstance());
-		}
+		if (getActiveComponent() != null && getActiveComponent().getInactiveDate() != null)
+			throw new ServiceConnectException("Account cannot be connected: Existing " + getActiveComponent() + " is not disconnected");
 
-		if (getActiveServiceComponent() != null && getActiveServiceComponent().getInactiveDate() != null)
-			throw new ServiceConnectException("Account cannot be connected: Existing " + getActiveServiceComponent() + " is not disconnected");
-
-		ServicePackage newServicePackage;
+		ServiceInstance newServiceInstnace = ServiceInstanceProvisioner.addServiceInstance(this);
+		ServicePackage newServicePackage = ServicePackageProvisioner.addPackage(new ServicePackage(account));
 		ServiceComponent newServiceComponent;
 
-		// TODO still need to check last active date as there is no way of getting the previous component if it is
-		// inactive
-		if (getActiveServiceComponent() == null || !getActiveServiceComponent().isCurrentMonth())
+		// TODO check last active date as there is no way of getting the previous component if it is inactive
+		if (getActiveComponent() == null || !getActiveComponent().isCurrentMonth())
 			newServiceComponent = new InstallComponent();
 		else
 			newServiceComponent = new ReinstallComponent();
 
-		newServiceInstance = ProvisionServiceInstanceService.addServiceInstance(account, newServiceInstance);
-		newServicePackage = ProvisionServicePackageService.addPackage(account.getAccountNo(), new ServicePackage());
-		newServiceComponent.setExternalId(newServiceInstance.getExternalId());
-		// newServiceComponent.setServicePackage(newServicePackage);
-		newServiceComponent = ProvisionServiceComponentService.addInitialComponent(newServiceComponent, newServicePackage);
+		newServiceComponent.setServiceInstance(newServiceInstnace);
+		newServiceComponent.setServicePackage(newServicePackage);
+		newServiceComponent = ServiceComponentProvisioner.addInitialComponent(newServiceComponent);
+
 		refresh();
 	}
 
-	@XmlTransient
 	public void disconnect() throws ServiceIntegrityException, ServiceDisconnectException, ProvisionException {
-		sanityCheck();
-		ProvisionServiceInstanceService.removeServiceInstance(account, getActiveServiceInstance());
+		integrityCheck();
+		ServiceInstanceProvisioner.removeServiceInstance(this);
 		refresh();
 	}
 
-	/**
-	 * Removes the current ServiceComponent and adds a RestoreComponent. If the current ServiceComponent has an active
-	 * date of the current month, no MRC should be charged and a ReinstallComponent will be provisioned.
-	 * 
-	 * @throws ServiceIntegrityException
-	 * @throws ServiceRestoreException
-	 * @throws ProvisionException
-	 */
-	@XmlTransient
 	public void restore() throws ServiceIntegrityException, ServiceRestoreException, ProvisionException {
-
-		sanityCheck();
-
-		if (getActiveServiceComponent().getId() != PROVISION.COMPONENT.SUSPEND)
-			throw new ServiceRestoreException("Service cannot be restored: Current ServiceComponent is not SUSPEND");
-
-		ServiceComponent restoreComponent = getActiveServiceComponent().isCurrentMonth() ? new ReinstallComponent(getActiveServiceComponent()) : new InstallComponent(getActiveServiceComponent());
-
-		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent(), getActiveServicePackage());
-		ProvisionServiceComponentService.addComponent(restoreComponent, getActiveServicePackage());
-		refreshServiceComponents();
+		integrityCheck();
+		if (getActiveComponent().getId() != PROVISION.COMPONENT.SUSPEND)
+			throw new ServiceRestoreException("Service cannot be restored: ServiceComponent is not SUSPEND");
+		ServiceComponentProvisioner.removeComponent(getActiveComponent());
+		ServiceComponentProvisioner.addComponent(getActiveComponent().isCurrentMonth() ? new ReinstallComponent(getActiveComponent().getServiceInstance()) : new InstallComponent(getActiveComponent().getServiceInstance()));
+		refresh();
 	}
 
-	/**
-	 * Removes the current ServiceComponent and adds a SuspendComponent with tomorrow as an active date. This allows us to
-	 * capture and rate any incoming usage.
-	 * 
-	 * @throws ServiceIntegrityException
-	 * @throws ServiceSuspendException
-	 * @throws ProvisionException
-	 */
 	@XmlTransient
 	public void suspend() throws ServiceIntegrityException, ServiceSuspendException, ProvisionException {
-
-		sanityCheck();
-
-		if (getActiveServiceComponent().getId() != PROVISION.COMPONENT.INSTALL && getActiveServiceComponent().getId() != PROVISION.COMPONENT.REINSTALL)
-			throw new ServiceSuspendException("Service cannot be suspended: Current ServiceComponent is not ACTIVE");
-
-		ProvisionServiceComponentService.removeComponent(getActiveServiceComponent(), getActiveServicePackage());
-		ProvisionServiceComponentService.addFutureComponent(new SuspendComponent(getActiveServiceComponent()), getActiveServicePackage());
-		refreshServiceComponents();
-	}
-
-	/* **************************************************
-	 * Integrity Methods
-	 */
-
-	@XmlTransient
-	public void sanityCheck() throws ServiceIntegrityException {
-		if (getActiveServiceInstance() == null)
-			throw new ServiceIntegrityException("Sevice has no active ServiceInstance");
-		if (getActiveServicePackage() == null)
-			throw new ServiceIntegrityException("Service has no active ServicePackage");
-		if (getActiveServiceComponent() == null)
-			throw new ServiceIntegrityException("Service has no active ServiceComponent");
-		if (getServiceComponents().size() > 1)
-			throw new ServiceIntegrityException("Service has more than one active component");
-	}
-
-	/* **************************************************
-	 * Fetch Methods
-	 */
-
-	public void load() {
+		integrityCheck();
+		if (!getActiveComponent().isActiveType())
+			throw new ServiceSuspendException("Service cannot be suspended: ServiceComponent is not ACTIVE");
+		ServiceComponentProvisioner.removeComponent(getActiveComponent());
+		ServiceComponentProvisioner.addFutureComponent(new SuspendComponent(getActiveComponent().getServiceInstance()));
 		refresh();
-	}
-
-	public boolean isLoaded() {
-		return loadedServiceInstances && loadedServicePackages && loadedServiceComponents;
-	}
-
-	public void refresh() {
-		refreshServiceInstances();
-		refreshServicePackages();
-		refreshServiceComponents();
-	}
-
-	protected void refreshServiceComponents() {
-		loadedServiceComponents = false;
-		serviceComponents = null;
-	}
-
-	protected void refreshServiceInstances() {
-		loadedServiceInstances = false;
-		serviceInstances = null;
-	}
-
-	protected void refreshServicePackages() {
-		loadedServicePackages = false;
-		servicePackages = null;
-	}
-
-	protected List<ServiceComponent> loadServiceComponents() {
-		List<ServiceComponent> temp;
-		List<ServiceComponent> result;
-
-		try {
-			if (getServiceInstances() == null) {
-				logger.warn("Cannot load ServiceComponents because {} has no ServiceInstances", this);
-				return null;
-			}
-
-			result = new ArrayList<ServiceComponent>();
-
-			for (ServiceInstance si : getServiceInstances()) {
-				temp = ProvisionServiceComponentService.getActiveComponents(account.getAccountNo(), si);
-				if (temp != null)
-					result.addAll(temp);
-			}
-			if (result.isEmpty())
-				logger.warn("{} has no active ServiceComponent", this);
-			return result;
-		} catch (ProvisionFetchException e) {
-			return null;
-		} finally {
-			loadedServiceComponents = true;
-			temp = null;
-		}
-	}
-
-	protected List<ServicePackage> loadServicePackages() {
-		try {
-			if (getServiceInstances() == null) {
-				logger.warn("Cannot load ServicePackages because {} has no ServiceInstances", this);
-				return null;
-			}
-
-			List<ServicePackage> result = ProvisionServicePackageService.getActivePackages(account.getAccountNo());
-			if (result == null || result.isEmpty())
-				logger.warn("{} has no active ServicePackage", this);
-			return result;
-		} catch (ProvisionFetchException e) {
-			return null;
-		} finally {
-			loadedServicePackages = true;
-		}
-	}
-
-	protected List<ServiceInstance> loadServiceInstances() {
-		try {
-			List<ServiceInstance> result = ProvisionServiceInstanceService.getActiveServices(account.getAccountNo());
-			// if (result != null)
-			// for (ServiceInstance si : result)
-			// si.setAccount(account);
-			return result;
-		} catch (ProvisionFetchException e) {
-			logger.error("Unable to fetch ServiceInstances for {}", this);
-			return null;
-		} finally {
-			loadedServiceInstances = true;
-		}
-	}
-
-	/* **************************************************
-	 * Getter and Setters: These are protected and viewable by KenanAccount, which can have any number of ServiceInstance,
-	 * ServicePackage and ServiceComponent
-	 */
-
-	@XmlTransient
-	protected KenanAccount getAccount() {
-		return account;
-	}
-
-	protected void setAccount(
-			KenanAccount account) {
-		this.account = account;
-	}
-
-	@XmlTransient
-	protected List<ServicePackage> getServicePackages() {
-		if (servicePackages == null && !loadedServicePackages)
-			servicePackages = loadServicePackages();
-		return servicePackages;
-	}
-
-	protected void setServicePackages(
-			List<ServicePackage> servicePackages) {
-		this.servicePackages = servicePackages;
-	}
-
-	@XmlTransient
-	protected List<ServiceInstance> getServiceInstances() {
-		if (serviceInstances == null && !loadedServiceInstances)
-			serviceInstances = loadServiceInstances();
-		return serviceInstances;
-	}
-
-	protected void setServiceInstances(
-			List<ServiceInstance> serviceInstances) {
-		this.serviceInstances = serviceInstances;
-	}
-
-	@XmlTransient
-	protected List<ServiceComponent> getServiceComponents() {
-		if (serviceComponents == null && !loadedServiceComponents)
-			serviceComponents = loadServiceComponents();
-		return serviceComponents;
-	}
-
-	protected void setServiceComponents(
-			List<ServiceComponent> serviceComponents) {
-		this.serviceComponents = serviceComponents;
-	}
-
-	/* **************************************************
-	 * Public Methods: These are viewable by Account, which should only have 1 ServiceInstance, 1 ServicePackage and 1
-	 * ServiceComponent
-	 */
-
-	@XmlElement
-	public ServiceComponent getActiveServiceComponent() {
-		getServiceComponents();
-		if (hasServiceComponents())
-			return getServiceComponents().get(0);
-		return null;
-	}
-
-	@XmlElement
-	public ServicePackage getActiveServicePackage() {
-		getServicePackages();
-		if (hasServicePackages())
-			return getServicePackages().get(0);
-		return null;
-	}
-
-	@XmlElement
-	public ServiceInstance getActiveServiceInstance() {
-		getServiceInstances();
-		if (hasServiceInstances()) {
-			return getServiceInstances().get(0);
-		}
-		return null;
-	}
-
-	@XmlTransient
-	public boolean hasServiceComponents() {
-		return serviceComponents != null && !serviceComponents.isEmpty();
-	}
-
-	@XmlTransient
-	public boolean hasServicePackages() {
-		return servicePackages != null && !servicePackages.isEmpty();
-	}
-
-	@XmlTransient
-	public boolean hasServiceInstances() {
-		return serviceInstances != null && !serviceInstances.isEmpty();
-	}
-
-	/* **************************************************
-	 * Debug Methods
-	 */
-
-	@Override
-	public String toString() {
-		return "Service [account=" + account.getAccountNo() + ", serviceInstances=" + getActiveServiceInstance().getExternalId() + ", serviceComponents=" + getActiveServiceComponent().getName() + "]";
 	}
 
 }

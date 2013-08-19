@@ -20,8 +20,6 @@ import com.telscape.billingserviceinterface.BillingAddressHolder;
 import com.telscape.billingserviceinterface.ContactInfoHolder;
 import com.telscape.billingserviceinterface.CustBalanceHolder;
 import com.telscape.billingserviceinterface.MessageHolder;
-import com.telscape.billingserviceinterface.PaymentHolder;
-import com.telscape.billingserviceinterface.UsageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
 import com.tscp.mvna.account.Account;
 import com.tscp.mvna.account.device.usage.OldUsageDetail;
@@ -47,8 +45,6 @@ import com.tscp.mvna.payment.PaymentRequest;
 import com.tscp.mvna.payment.PaymentResponse;
 import com.tscp.mvna.payment.service.PaymentService;
 import com.tscp.mvne.billing.exception.BillingException;
-import com.tscp.mvne.billing.provisioning.Component;
-import com.tscp.mvne.billing.provisioning.ProvisionUtil;
 
 public class AccountService extends KenanGatewayService {
 	protected static final Logger logger = LoggerFactory.getLogger(AccountService.class);
@@ -249,30 +245,19 @@ public class AccountService extends KenanGatewayService {
 		return null;
 	}
 
-	/* **************************************************
-	 * UNIMPLEMENTED
-	 */
+	// TODO IMPLEMENT THE BELOW
 
 	public Account getUnlinkedAccount(
 			int custId) {
 		throw new NotImplementedException();
 	}
 
-	public int getAccountNoByTN(
-			String externalId) {
-		throw new NotImplementedException();
-	}
-
-	public List<PaymentHolder> getPaymentHistory(
-			Account account) {
-		throw new NotImplementedException();
-	}
-
-	public UsageHolder getUnbilledUsageSummary(
-			ServiceInstance serviceInstance) {
-		throw new NotImplementedException();
-	}
-
+	/**
+	 * Pro-rated amonts should be stored in table TC_MOB_MINS on K11MVNO@TSCPMVNA
+	 * 
+	 * @return
+	 */
+	@Deprecated
 	public static final double getProratedMRC() {
 		DateTime dateTime = new DateTime();
 		int daysPast = dateTime.getDayOfMonth();
@@ -287,11 +272,6 @@ public class AccountService extends KenanGatewayService {
 		return getLastActiveDate(accountNo, externalId).getTime() <= (new Date()).getTime();
 	}
 
-	public static final boolean checkChargeMRCByComponent(
-			Component component) throws BillingException {
-		return !ProvisionUtil.isCurrentMonth(component);
-	}
-
 	public static List<OldUsageDetail> getChargeHistory(
 			int accountNo, String externalId) {
 		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -299,6 +279,7 @@ public class AccountService extends KenanGatewayService {
 		Query q = session.getNamedQuery("sp_fetch_charge_history");
 		q.setParameter("in_account_no", accountNo);
 		q.setParameter("in_external_id", externalId);
+		@SuppressWarnings("unchecked")
 		List<OldUsageDetail> usageDetailList = q.list();
 		session.getTransaction().rollback();
 		return usageDetailList;

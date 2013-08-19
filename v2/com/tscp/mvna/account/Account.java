@@ -30,7 +30,7 @@ import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.exception.AccountConnectException;
 import com.tscp.mvna.account.kenan.exception.AccountDisconnectException;
 import com.tscp.mvna.account.kenan.exception.AccountUpdateException;
-import com.tscp.mvna.account.kenan.provision.ServiceInstance;
+import com.tscp.mvna.account.kenan.provision.Service;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.service.AccountService;
 import com.tscp.mvna.user.Customer;
@@ -52,9 +52,10 @@ public class Account extends KenanAccount implements Serializable {
 	@Transient
 	@XmlTransient
 	public void connect(
-			ServiceInstance serviceInstance) throws AccountConnectException {
+			Service service) throws AccountConnectException {
 		try {
-			getService().connect(serviceInstance);
+			service.setAccount(this);
+			service.connect();
 		} catch (ProvisionException e) {
 			throw new AccountConnectException(e);
 		}
@@ -91,7 +92,7 @@ public class Account extends KenanAccount implements Serializable {
 		}
 
 		try {
-			AccountService.updateServiceInstanceStatus(getService().getActiveServiceInstance(), PROVISION.SERVICE.RESTORE);
+			AccountService.updateServiceInstanceStatus(getService(), PROVISION.SERVICE.RESTORE);
 		} catch (AccountUpdateException e) {
 			logger.error("Unable to restore account: Could not update Threshold");
 			logger.warn("{} does not have correct threshold {}", this, PROVISION.SERVICE.RESTORE);
@@ -111,7 +112,7 @@ public class Account extends KenanAccount implements Serializable {
 		}
 
 		try {
-			AccountService.updateServiceInstanceStatus(getService().getActiveServiceInstance(), PROVISION.SERVICE.HOTLINE);
+			AccountService.updateServiceInstanceStatus(getService(), PROVISION.SERVICE.HOTLINE);
 		} catch (AccountUpdateException e) {
 			logger.error("Unable to suspend account: Could not update Threshold");
 			logger.warn("{} does not have correct threshold {}", this, PROVISION.SERVICE.HOTLINE);

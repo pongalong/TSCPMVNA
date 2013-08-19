@@ -1,160 +1,92 @@
 package com.tscp.mvna.account.device;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
+import com.tscp.mvna.Integrity;
 import com.tscp.mvna.account.device.network.NetworkInfo;
 import com.tscp.mvna.account.device.network.NetworkStatus;
 import com.tscp.mvna.account.kenan.provision.ServiceComponent;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
-import com.tscp.mvna.account.kenan.provision.ServicePackage;
 import com.tscp.mvne.config.PROVISION;
 
-//TODO change problemObject and description to a List to provide multiple errors
 @XmlRootElement
-public class DeviceIntegrity {
-	private boolean sane;
-	private Object problemObject;
-	private String description;
+public class DeviceIntegrity extends Integrity<DeviceAndService> {
 
-	/* **************************************************
-	 * Sanity Check Methods
-	 */
+	public DeviceIntegrity(DeviceAndService target) {
+		super(target);
+	}
 
-	@XmlTransient
-	public void sanityCheck(
-			DeviceAndService device) {
+	public void check() {
 
-		NetworkInfo ni = device.getNetworkInfo();
-		ServiceInstance si = device.getService().getActiveServiceInstance();
-		ServicePackage sp = device.getService().getActiveServicePackage();
-		ServiceComponent sc = device.getService().getActiveServiceComponent();
+		if (target == null) {
+			addProblem(target, "Target is null");
+			return;
+		}
+
+		NetworkInfo ni = target.getNetworkInfo();
+		ServiceInstance si = target.getService();
+		ServiceComponent sc = target.getService().getActiveComponent();
 
 		// NULL checks
-		if (ni == null) {
-			description = "NetworkInfo is null";
-			return;
-		} else if (ni.getStatus() == NetworkStatus.C) {
-			if (si != null) {
-				description = "NetworkInfo is disconnected but ServiceInstance still exsists";
-				return;
-			}
-			if (sp != null) {
-				description = "NetworkInfo is disconnected but ServicePackage still exsists";
-				return;
-			}
-			if (sc != null) {
-				description = "NetworkInfo is disconnected but ServiceComponent still exsists";
-				return;
-			}
-		} else {
+		if (ni == null)
+			addProblem(ni, "NetworkInfo is null");
 
-			if (si == null) {
-				description = "ServiceInstance is null";
-				return;
-			}
-
-			if (sp == null) {
-				description = "ServicePackage is null";
-				return;
-			}
-
-			if (sc == null) {
-				description = "ServiceComponent is null";
-				return;
-			}
-
-			// TODO REIMPLEMENT THIS CHECK
-			// if (sc.getServicePackage().getInstanceId() != sp.getInstanceId()) {
-			// description = "ServiceComponent is not associated with ServicePackage";
-			// return;
-			// }
-
-			// MDN check
-			if (!si.getExternalId().equals(ni.getMdn())) {
-				description = "ServiceInstance MDN does not match NetworkInfo MDN";
-				problemObject = si;
-				return;
-			}
-
-			// Component empty check
-			// if (sp.getComponentList() == null || sp.getComponentList().isEmpty()) {
-			// description = "ServicePackage has no ServiceComponents";
-			// problemObject = sp;
-			// return;
-			// }
-
-			// integrity check for active device
-			if (ni.getStatus() == NetworkStatus.A) {
-				if (si.getInactiveDate() != null) {
-					description = "ServiceInstance is disconnected, but NetworkInfo is active";
-					problemObject = si;
-					return;
-				}
-				if (sc.getId() != PROVISION.COMPONENT.INSTALL && sc.getId() != PROVISION.COMPONENT.REINSTALL) {
-					description = "ServiceComponent is not of active type, but NetworkInfo is active";
-					problemObject = sc;
-					return;
-				}
-			}
-
-			// integrity check for suspended device
-			if (ni.getStatus() == NetworkStatus.S) {
-				if (si.getInactiveDate() != null) {
-					description = "ServiceInstance is disconnected, but NetworkInfo is suspended";
-					problemObject = si;
-					return;
-				}
-				if (sc.getId() != PROVISION.COMPONENT.SUSPEND) {
-					description = "ServiceComponent is not of suspend type, but NetworkInfo is suspended";
-					problemObject = sc;
-					return;
-				}
-			}
-
-			// integrity check for disconnected device
-			if (ni.getStatus() == NetworkStatus.C) {
-				if (si.getInactiveDate() != null) {
-					description = "ServiceInstance is not disconnected, but NetworkInfo is";
-					problemObject = si;
-					return;
-				}
+		// integrity check for reserved device
+		if (ni != null && ni.getStatus() == NetworkStatus.R) {
+			if (si == null)
+				addProblem(si, "ServiceInstance is null, but NetworkInfo is in RESERVED");
+			else if (si.getInactiveDate() != null)
+				addProblem(si, "ServiceInstance is disconnected, but NetworkInfo is RESERVED");
+			if (sc == null)
+				addProblem(sc, "ServiceComponent is null, but NetworkInfo is in RESERVED");
+			else {
+				if (sc.getInactiveDate() != null)
+					addProblem(sc, "ServiceComponent is disconnected, but NetworkInfo is RESERVED");
+				if (!sc.isActiveType())
+					addProblem(sc, "ServiceComponent is not of ACTIVE type, but NetworkInfo is RESERVED");
 			}
 		}
-		sane = true;
-	}
 
-	/* **************************************************
-	 * Getters and Setters
-	 */
+		// integrity check for active device
+		if (ni != null && ni.getStatus() == NetworkStatus.A) {
+			if (si == null)
+				addProblem(si, "ServiceInstance is null, but NetworkInfo is in ACTIVE");
+			else if (si.getInactiveDate() != null)
+				addProblem(si, "ServiceInstance is disconnected, but NetworkInfo is ACTIVE");
+			if (sc == null)
+				addProblem(sc, "ServiceComponent is null, but NetworkInfo is in ACTIVE");
+			else {
+				if (sc.getInactiveDate() != null)
+					addProblem(sc, "ServiceComponent is disconnected, but NetworkInfo is ACTIVE");
+				if (!sc.isActiveType())
+					addProblem(sc, "ServiceComponent is not of ACTIVE type, but NetworkInfo is ACTIVE");
+			}
+		}
 
-	@XmlAttribute
-	public boolean isSane() {
-		return sane;
-	}
+		// integrity check for suspended device
+		if (ni != null && ni.getStatus() == NetworkStatus.S) {
+			if (si == null)
+				addProblem(si, "ServiceInstance is null, but NetworkInfo is in SUSPEND");
+			else if (si.getInactiveDate() != null)
+				addProblem(si, "ServiceInstance is disconnected, but NetworkInfo is in SUSPEND");
+			if (sc == null)
+				addProblem(sc, "ServiceComponent is null, but NetworkInfo is in SUSPEND");
+			else if (sc.getId() != PROVISION.COMPONENT.SUSPEND)
+				addProblem(sc, "ServiceComponent is not of SUSPEND type, but NetworkInfo is in SUSPEND");
+		}
 
-	public void setSane(
-			boolean sane) {
-		this.sane = sane;
-	}
+		// integrity check for disconnected device
+		if (ni != null && ni.getStatus() == NetworkStatus.C) {
+			if (si != null)
+				addProblem(si, "ServiceInstance is active, but NetworkInfo is disconnected");
+			if (si != null && si.getInactiveDate() != null)
+				addProblem(si, "ServiceInstance is active, but NetworkInfo is disconnected");
+			if (sc != null)
+				addProblem(sc, "ServiceComponent is active, but NetworkInfo is disconnected");
+			if (sc != null && sc.getInactiveDate() != null)
+				addProblem(sc, "ServiceComponent is active, but NetworkInfo is disconnected");
+		}
 
-	public Object getProblemObject() {
-		return problemObject;
-	}
-
-	public void setProblemObject(
-			Object problemObject) {
-		this.problemObject = problemObject;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(
-			String description) {
-		this.description = description;
 	}
 
 }

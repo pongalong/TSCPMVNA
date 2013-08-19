@@ -21,7 +21,6 @@ import com.tscp.mvna.account.exception.AccountRestoreException;
 import com.tscp.mvna.account.exception.AccountSuspendException;
 import com.tscp.mvna.account.kenan.exception.AccountDisconnectException;
 import com.tscp.mvna.account.kenan.provision.Service;
-import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 
 @Entity
 @Table(name = "DEVICE")
@@ -51,7 +50,7 @@ public class DeviceAndService extends Device implements Serializable {
 			throw new ConnectException("Account is null and cannot be connected");
 
 		try {
-			getAccount().connect(new ServiceInstance(getNetworkInfo()));
+			getAccount().connect(new Service(getNetworkInfo()));
 		} catch (Exception e) {
 			try {
 				super.disconnect();
@@ -136,8 +135,8 @@ public class DeviceAndService extends Device implements Serializable {
 	@XmlElement
 	public DeviceIntegrity getIntegrity() {
 		if (integrity == null) {
-			integrity = new DeviceIntegrity();
-			integrity.sanityCheck(this);
+			integrity = new DeviceIntegrity(this);
+			integrity.check();
 		}
 		return integrity;
 	}

@@ -3,13 +3,14 @@ package com.tscp.mvna.account.kenan.provision;
 import com.tscp.mvne.config.PROVISION;
 
 public class ReinstallComponent extends ServiceComponent {
+	private static final long serialVersionUID = -3059839014612356221L;
 
 	public ReinstallComponent() {
 		super.setId(PROVISION.COMPONENT.REINSTALL);
 	}
 
-	public ReinstallComponent(ServiceComponent component) {
-		super(component);
+	public ReinstallComponent(ServiceInstance serviceInstance) {
+		super(serviceInstance);
 		super.setId(PROVISION.COMPONENT.REINSTALL);
 	}
 

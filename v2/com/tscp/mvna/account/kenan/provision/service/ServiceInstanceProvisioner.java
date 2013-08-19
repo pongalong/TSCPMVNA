@@ -9,42 +9,37 @@ import org.slf4j.LoggerFactory;
 
 import com.telscape.billingserviceinterface.ServiceHolder;
 import com.tscp.mvna.account.kenan.KenanAccount;
-import com.tscp.mvna.account.kenan.product.ServiceInstanceV2;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
+import com.tscp.mvna.account.kenan.service.KenanAdapter;
 import com.tscp.util.DateUtils;
 
-public class ProvisionServiceInstanceService extends ProvisionService {
-	protected static final Logger logger = LoggerFactory.getLogger(ProvisionServiceInstanceService.class);
-	protected static final String USERNAME = ProvisionServiceInstanceService.class.getSimpleName();
+public class ServiceInstanceProvisioner extends Provisioner {
+	protected static final Logger logger = LoggerFactory.getLogger(ServiceInstanceProvisioner.class);
+	protected static final String USERNAME = ServiceInstanceProvisioner.class.getSimpleName();
 
 	/* **************************************************
 	 * Fetch Methods
 	 */
 
-	public static List<ServiceInstanceV2> properGetActiveServices(
-			int accountNo) throws ProvisionFetchException {
-
-		List<ServiceInstanceV2> results = new ArrayList<ServiceInstanceV2>();
-
-		try {
-			for (ServiceHolder serviceHolder : checkResponse(port.getActiveService(USERNAME, Integer.toString(accountNo))))
-				results.add(ServiceInstanceV2.fromService(serviceHolder.getService()));
-			return results;
-		} catch (ProvisionException e) {
-			return null;
-		}
-	}
-
 	public static List<ServiceInstance> getActiveServices(
-			int accountNo) throws ProvisionFetchException {
+			KenanAccount account) throws ProvisionFetchException {
+
+		if (account == null || account.getAccountNo() == 0)
+			throw new ProvisionFetchException("Account must be provided");
 
 		List<ServiceInstance> results = new ArrayList<ServiceInstance>();
+		ServiceInstance temp;
 
 		try {
-			for (ServiceHolder serviceHolder : checkResponse(port.getActiveService(USERNAME, Integer.toString(accountNo))))
-				results.add(ServiceInstance.fromService(serviceHolder.getService()));
+			for (ServiceHolder serviceHolder : checkResponse(port.getActiveService(USERNAME, Integer.toString(account.getAccountNo())))) {
+				temp = KenanAdapter.fromService(serviceHolder.getService());
+				if (temp.getAccount().getAccountNo() != account.getAccountNo())
+					logger.warn("{} does not have matching account {}", temp, account);
+				temp.setAccount(account);
+				results.add(temp);
+			}
 			return results;
 		} catch (ProvisionException e) {
 			return null;
@@ -56,22 +51,22 @@ public class ProvisionServiceInstanceService extends ProvisionService {
 	 */
 
 	public static ServiceInstance addServiceInstance(
-			KenanAccount account, ServiceInstance serviceInstance) throws ProvisionException {
+			ServiceInstance serviceInstance) throws ProvisionException {
 
-		logger.debug("Connecting {} to {}", serviceInstance, account);
+		logger.debug("Connecting {}", serviceInstance);
 
-		if (account == null || account.getAccountNo() == 0)
+		if (serviceInstance.getAccount() == null || serviceInstance.getAccount().getAccountNo() == 0)
 			throw new ProvisionException("Account is null or not specified");
 		if (serviceInstance == null || serviceInstance.isEmpty())
 			throw new ProvisionException("ServiceInstnace is null or not specified");
 
-		reactivateAccount(account);
+		reactivateAccount(serviceInstance.getAccount());
 
 		try {
-			checkResponse(port.addService(USERNAME, ServiceInstance.toBillingService(serviceInstance, account)));
+			checkResponse(port.addService(USERNAME, KenanAdapter.toBillingService(serviceInstance)));
 			return serviceInstance;
 		} catch (Exception e) {
-			logger.error("Unable to connect {} with {}", account, serviceInstance, e);
+			logger.error("Unable to connect {}", serviceInstance, e);
 			throw new ProvisionException(e);
 		}
 
@@ -82,9 +77,11 @@ public class ProvisionServiceInstanceService extends ProvisionService {
 	 */
 
 	public static void removeServiceInstance(
-			KenanAccount account, ServiceInstance serviceInstance) throws ProvisionException {
+			ServiceInstance serviceInstance) throws ProvisionException {
 
-		logger.debug("Disconnecting {} from {}", serviceInstance, account);
+		logger.debug("Disconnecting {}", serviceInstance);
+
+		KenanAccount account = serviceInstance.getAccount();
 
 		if (account == null || account.getAccountNo() == 0)
 			throw new ProvisionException("Account is null or not specified");

@@ -8,33 +8,53 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.telscape.billingserviceinterface.PkgComponent;
 import com.tscp.mvna.account.kenan.KenanObject;
-import com.tscp.mvna.account.kenan.provision.service.ProvisionService;
-import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultPkgComponent;
+import com.tscp.mvne.config.PROVISION;
 import com.tscp.util.DateUtils;
 
 @XmlRootElement
 public class ServiceComponent extends KenanObject {
 	private static final long serialVersionUID = -7131375586432560540L;
 	protected static final Logger logger = LoggerFactory.getLogger(ServiceComponent.class);
-	protected int instanceId;
 	protected int id;
+	protected int instanceId;
+	protected int serverId;
 	protected String name;
-	protected String externalId;
 	protected DateTime activeDate = new DateTime();
 	protected DateTime inactiveDate;
+
+	protected ServicePackage servicePackage;
+	protected ServiceInstance serviceInstance;
 
 	/* **************************************************
 	 * Constructors
 	 */
 
-	protected ServiceComponent() {
+	public ServiceComponent() {
 		// do nothing
 	}
 
-	public ServiceComponent(ServiceComponent component) {
-		this.externalId = component.getExternalId();
+	public ServiceComponent(String externalId) {
+		serviceInstance = new ServiceInstance();
+		serviceInstance.setExternalId(externalId);
+	}
+
+	public ServiceComponent(ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
+	}
+
+	/* **************************************************
+	 * Fetch Methods
+	 */
+
+	@Override
+	public void load() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+	}
+
+	@Override
+	protected Object loadValue() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
 	}
 
 	/* **************************************************
@@ -61,14 +81,13 @@ public class ServiceComponent extends KenanObject {
 		this.instanceId = instanceId;
 	}
 
-	@XmlAttribute
-	public String getExternalId() {
-		return externalId;
+	public Integer getServerId() {
+		return serverId;
 	}
 
-	public void setExternalId(
-			String externalId) {
-		this.externalId = externalId;
+	public void setServerId(
+			int serverId) {
+		this.serverId = serverId;
 	}
 
 	@XmlAttribute
@@ -99,12 +118,30 @@ public class ServiceComponent extends KenanObject {
 		this.inactiveDate = inactiveDate;
 	}
 
+	public ServicePackage getServicePackage() {
+		return servicePackage;
+	}
+
+	public void setServicePackage(
+			ServicePackage servicePackage) {
+		this.servicePackage = servicePackage;
+	}
+
+	public ServiceInstance getServiceInstance() {
+		return serviceInstance;
+	}
+
+	public void setServiceInstance(
+			ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
+	}
+
 	/* **************************************************
 	 * Helper Methods
 	 */
 
 	@XmlTransient
-	public boolean isTommorrow() {
+	public boolean isNextDay() {
 		return DateUtils.sameDay(getActiveDate(), new DateTime().plusDays(1));
 	}
 
@@ -115,49 +152,12 @@ public class ServiceComponent extends KenanObject {
 
 	@XmlTransient
 	public boolean isEmpty() {
-		return instanceId == 0 || externalId == null || externalId.isEmpty();
+		return instanceId == 0 || serviceInstance == null || serviceInstance.isEmpty();
 	}
 
-	/* **************************************************
-	 * Adaptor Methods for KenanGateway Objects
-	 */
-
-	public static final ServiceComponent fromPkgComponent(
-			PkgComponent billingComponent) {
-
-		ServiceComponent serviceComponent = new ServiceComponent();
-		serviceComponent.setInstanceId(billingComponent.getComponentInstanceId());
-		serviceComponent.setId(billingComponent.getComponentId());
-		serviceComponent.setName(billingComponent.getComponentName());
-		serviceComponent.setExternalId(billingComponent.getExternalId());
-
-		if (billingComponent.getComponentActiveDate() != null && !ProvisionService.isNullDate(billingComponent.getComponentActiveDate()))
-			serviceComponent.setActiveDate(new DateTime(billingComponent.getComponentActiveDate().toGregorianCalendar()));
-		if (billingComponent.getDiscDate() != null && !ProvisionService.isNullDate(billingComponent.getDiscDate()))
-			serviceComponent.setInactiveDate(new DateTime(billingComponent.getDiscDate().toGregorianCalendar()));
-
-		return serviceComponent;
-	}
-
-	public static final PkgComponent toPkgComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) {
-
-		PkgComponent result = new DefaultPkgComponent();
-		result.setExternalId(serviceComponent.getExternalId());
-		result.setComponentId(serviceComponent.getId());
-		result.setComponentInstanceId(serviceComponent.getInstanceId());
-		result.setComponentName(serviceComponent.getName());
-		result.setComponentActiveDate(DateUtils.getXMLCalendar(serviceComponent.getActiveDate()));
-		result.setDiscDate(DateUtils.getXMLCalendar(serviceComponent.getInactiveDate()));
-
-		if (servicePackage != null) {
-			result.setPackageInstanceId(servicePackage.getInstanceId());
-			result.setPackageId(servicePackage.getId());
-			result.setPackageName(servicePackage.getName());
-			result.setPackageActiveDate(DateUtils.getXMLCalendar(servicePackage.getActiveDate()));
-		}
-
-		return result;
+	@XmlTransient
+	public boolean isActiveType() {
+		return id == PROVISION.COMPONENT.INSTALL || id == PROVISION.COMPONENT.REINSTALL;
 	}
 
 	/* **************************************************
@@ -166,17 +166,10 @@ public class ServiceComponent extends KenanObject {
 
 	@Override
 	public String toString() {
-		return "ServiceComponent [id=" + id + ", externalId=" + externalId + ", name=" + name + ", instanceId=" + instanceId + "]";
-	}
-
-	@Override
-	public void load() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
-	}
-
-	@Override
-	protected Object loadValue() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+		String toString = "ServiceComponent [id=" + id;
+		toString += serviceInstance != null ? ", externalId=" + serviceInstance.getExternalId() : null;
+		toString += ", name=" + name + ", instanceId=" + instanceId + "]";
+		return toString;
 	}
 
 }

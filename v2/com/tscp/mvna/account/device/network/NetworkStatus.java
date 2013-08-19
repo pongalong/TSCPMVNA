@@ -22,4 +22,8 @@ public enum NetworkStatus {
 		return this == R || this == C || this == P;
 	}
 
+	public boolean isAlive() {
+		return this == R || this == A || this == S;
+	}
+
 }

@@ -78,7 +78,7 @@ public class TSCPMVNA2 {
 	@WebMethod
 	public UsageHistory getUsageHistoryByDevice(
 			DeviceAndService device) {
-		return getUsageHistoryById(device.getAccountNo(), device.getService().getActiveServiceInstance().getExternalId());
+		return getUsageHistoryById(device.getAccountNo(), device.getService().getExternalId());
 	}
 
 	@WebMethod

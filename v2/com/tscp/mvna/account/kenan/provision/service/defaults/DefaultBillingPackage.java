@@ -14,9 +14,4 @@ public class DefaultBillingPackage extends Package {
 		setAccountNo("");
 	}
 
-	// public DefaultBillingPackage(int accountNo) {
-	// this();
-	// setAccountNo(Integer.toString(accountNo));
-	// }
-
 }

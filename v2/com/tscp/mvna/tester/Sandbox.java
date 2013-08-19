@@ -14,7 +14,7 @@ public class Sandbox {
 			Collection numbers = new ArrayList();
 			numbers.add(1);
 			numbers.add(2);
-			
+
 			blah.addAll(null);
 
 			blah.addAll(numbers);

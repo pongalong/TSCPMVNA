@@ -25,10 +25,10 @@ import com.tscp.mvna.account.kenan.service.KenanGatewayService;
  * @author Jonathan
  * 
  */
-public class ProvisionService extends KenanGatewayService {
-	protected static final Logger logger = LoggerFactory.getLogger(ProvisionService.class);
-	protected static final String USERNAME = ProvisionService.class.getSimpleName();
-	protected static final short DISC_REASON = 5;
+public class Provisioner extends KenanGatewayService {
+	protected static final Logger logger = LoggerFactory.getLogger(Provisioner.class);
+	protected static final String USERNAME = Provisioner.class.getSimpleName();
+	public static final short DISC_REASON = 5;
 
 	/* **************************************************
 	 * Server Response Validation Methods

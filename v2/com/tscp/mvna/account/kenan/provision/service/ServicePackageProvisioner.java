@@ -9,29 +9,39 @@ import org.slf4j.LoggerFactory;
 import com.telscape.billingserviceinterface.ArrayOfPackage;
 import com.telscape.billingserviceinterface.PackageHolder;
 import com.telscape.billingserviceinterface.ValueHolder;
+import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.exception.KenanException;
 import com.tscp.mvna.account.kenan.provision.ServicePackage;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
+import com.tscp.mvna.account.kenan.service.KenanAdapter;
 import com.tscp.util.DateUtils;
 
-public class ProvisionServicePackageService extends ProvisionService {
-	protected static final Logger logger = LoggerFactory.getLogger(ProvisionServicePackageService.class);
-	protected static final String USERNAME = ProvisionServicePackageService.class.getSimpleName();
+public class ServicePackageProvisioner extends Provisioner {
+	protected static final Logger logger = LoggerFactory.getLogger(ServicePackageProvisioner.class);
+	protected static final String USERNAME = ServicePackageProvisioner.class.getSimpleName();
 
 	/* **************************************************
 	 * Fetch Methods
 	 */
 
 	public static List<ServicePackage> getActivePackages(
-			int accountNo) throws ProvisionFetchException {
-		if (accountNo == 0)
-			throw new ProvisionFetchException("Account number must be provided");
+			KenanAccount account) throws ProvisionFetchException {
+
+		if (account == null || account.getAccountNo() == 0)
+			throw new ProvisionFetchException("Account must be provided");
+
+		List<ServicePackage> results = new ArrayList<ServicePackage>();
+		ServicePackage temp;
 
 		try {
-			List<ServicePackage> results = new ArrayList<ServicePackage>();
-			for (PackageHolder packageHolder : checkResponse(port.getListActivePackages(USERNAME, Integer.toString(accountNo))))
-				results.add(ServicePackage.fromBillingPackage(packageHolder.getPackage()));
+			for (PackageHolder packageHolder : checkResponse(port.getListActivePackages(USERNAME, Integer.toString(account.getAccountNo())))) {
+				temp = KenanAdapter.fromBillingPackage(packageHolder.getPackage());
+				if (temp.getAccount().getAccountNo() != account.getAccountNo())
+					logger.warn("{} does not have matching account {}", temp, account);
+				temp.setAccount(account);
+				results.add(temp);
+			}
 			return results;
 		} catch (ProvisionException e) {
 			return null;
@@ -50,14 +60,12 @@ public class ProvisionServicePackageService extends ProvisionService {
 	 * @throws ProvisionException
 	 */
 	public static ServicePackage addPackage(
-			int accountNo, ServicePackage servicePackage) throws ProvisionException {
-		if (accountNo == 0)
-			throw new ProvisionException("Account number must be provided");
+			ServicePackage servicePackage) throws ProvisionException {
 
 		if (servicePackage == null)
-			servicePackage = new ServicePackage();
-		if (servicePackage.getAccountNo() == 0)
-			servicePackage.setAccountNo(accountNo);
+			throw new ProvisionException("ServicePackage is null");
+		if (servicePackage.getAccount() == null || servicePackage.getAccount().getAccountNo() == 0)
+			throw new ProvisionException("Account must be provided");
 
 		try {
 			ValueHolder valueHolder = checkResponse(port.addPackage(USERNAME, toBillingPackageList(servicePackage)));
@@ -111,7 +119,7 @@ public class ProvisionServicePackageService extends ProvisionService {
 	public static ArrayOfPackage toBillingPackageList(
 			ServicePackage servicePackage) {
 		ArrayOfPackage result = new ArrayOfPackage();
-		result.getPackage().add(ServicePackage.toBillingPackage(servicePackage));
+		result.getPackage().add(KenanAdapter.toBillingPackage(servicePackage));
 		return result;
 	}
 

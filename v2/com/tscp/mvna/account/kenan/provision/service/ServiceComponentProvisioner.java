@@ -10,52 +10,40 @@ import org.slf4j.LoggerFactory;
 import com.telscape.billingserviceinterface.ArrayOfPkgComponent;
 import com.telscape.billingserviceinterface.ComponentHolder;
 import com.telscape.billingserviceinterface.PkgComponent;
-import com.tscp.mvna.account.kenan.product.ServiceComponentV2;
-import com.tscp.mvna.account.kenan.product.ServiceInstanceV2;
 import com.tscp.mvna.account.kenan.provision.ServiceComponent;
 import com.tscp.mvna.account.kenan.provision.ServiceInstance;
 import com.tscp.mvna.account.kenan.provision.ServicePackage;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionException;
 import com.tscp.mvna.account.kenan.provision.exception.ProvisionFetchException;
+import com.tscp.mvna.account.kenan.service.KenanAdapter;
 import com.tscp.util.DateUtils;
 
-public class ProvisionServiceComponentService extends ProvisionService {
-	protected static final Logger logger = LoggerFactory.getLogger(ProvisionServiceComponentService.class);
-	protected static final String USERNAME = ProvisionServiceComponentService.class.getSimpleName();
+public class ServiceComponentProvisioner extends Provisioner {
+	protected static final Logger logger = LoggerFactory.getLogger(ServiceComponentProvisioner.class);
+	protected static final String USERNAME = ServiceComponentProvisioner.class.getSimpleName();
 
 	/* **************************************************
 	 * Fetch Methods
 	 */
 
-	public static List<ServiceComponentV2> properGetActiveComponents(
-			int accountNo, ServiceInstanceV2 serviceInstance) throws ProvisionFetchException {
-
-		if (accountNo == 0)
-			throw new ProvisionFetchException("Account number must be provided");
-
-		List<ServiceComponentV2> results = new ArrayList<ServiceComponentV2>();
-
-		try {
-			for (ComponentHolder componentHolder : checkResponse(port.getListActiveComponent(USERNAME, Integer.toString(accountNo), serviceInstance.getExternalId())))
-				results.add(new ServiceComponentV2(ServiceComponent.fromPkgComponent(componentHolder.getComponent()), serviceInstance));
-		} catch (Exception e) {
-			throw e;
-		}
-
-		return results;
-	}
-
 	public static List<ServiceComponent> getActiveComponents(
-			int accountNo, ServiceInstance serviceInstance) throws ProvisionFetchException {
+			ServiceInstance serviceInstance) throws ProvisionFetchException {
 
-		if (accountNo == 0)
-			throw new ProvisionFetchException("Account number must be provided");
+		if (serviceInstance.getAccount() == null || serviceInstance.getAccount().getAccountNo() == 0)
+			throw new ProvisionFetchException("Account must be provided");
 
 		List<ServiceComponent> results = new ArrayList<ServiceComponent>();
 
 		try {
-			for (ComponentHolder componentHolder : checkResponse(port.getListActiveComponent(USERNAME, Integer.toString(accountNo), serviceInstance.getExternalId())))
-				results.add(ServiceComponent.fromPkgComponent(componentHolder.getComponent()));
+			ServiceComponent temp;
+			for (ComponentHolder componentHolder : checkResponse(port.getListActiveComponent(USERNAME, Integer.toString(serviceInstance.getAccount().getAccountNo()), serviceInstance.getExternalId()))) {
+				temp = KenanAdapter.fromPkgComponent(componentHolder.getComponent());
+				if (!temp.getServiceInstance().getExternalId().equals(serviceInstance.getExternalId()))
+					logger.warn("{} does not match externalId on {}", temp, serviceInstance);
+				else
+					temp.setServiceInstance(serviceInstance);
+				results.add(temp);
+			}
 		} catch (Exception e) {
 			throw e;
 		}
@@ -68,18 +56,18 @@ public class ProvisionServiceComponentService extends ProvisionService {
 	 */
 
 	public static ServiceComponent addInitialComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) throws ProvisionException {
-		return addComponent(serviceComponent, servicePackage, false, false);
+			ServiceComponent serviceComponent) throws ProvisionException {
+		return addComponent(serviceComponent, false, false);
 	}
 
 	public static ServiceComponent addFutureComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) throws ProvisionException {
-		return addComponent(serviceComponent, servicePackage, true, true);
+			ServiceComponent serviceComponent) throws ProvisionException {
+		return addComponent(serviceComponent, true, true);
 	}
 
 	public static ServiceComponent addComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) throws ProvisionException {
-		return addComponent(serviceComponent, servicePackage, false, true);
+			ServiceComponent serviceComponent) throws ProvisionException {
+		return addComponent(serviceComponent, false, true);
 	}
 
 	/**
@@ -92,14 +80,14 @@ public class ProvisionServiceComponentService extends ProvisionService {
 	 * @throws ProvisionException
 	 */
 	protected static ServiceComponent addComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage, boolean nextDay, boolean single) throws ProvisionException {
+			ServiceComponent serviceComponent, boolean nextDay, boolean single) throws ProvisionException {
 
 		if (nextDay)
 			serviceComponent.setActiveDate(new DateTime().plusDays(1));
 
 		logger.debug("Adding {} with Date [{}]", serviceComponent, serviceComponent.getActiveDate().toLocalDate());
 
-		ArrayOfPkgComponent componentList = buildPkgComponentList(serviceComponent, servicePackage);
+		ArrayOfPkgComponent componentList = buildPkgComponentList(serviceComponent);
 
 		try {
 			if (single)
@@ -125,18 +113,18 @@ public class ProvisionServiceComponentService extends ProvisionService {
 	 * @throws ProvisionException
 	 */
 	public static void removeComponent(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) throws ProvisionException {
+			ServiceComponent serviceComponent) throws ProvisionException {
 
 		DateTime inactiveDate = new DateTime();
 
-		if (serviceComponent.isTommorrow())
+		if (serviceComponent.isNextDay())
 			serviceComponent.setInactiveDate(new DateTime().plusDays(1));
 		if (serviceComponent.getInactiveDate() == null || serviceComponent.getInactiveDate().isBeforeNow())
 			serviceComponent.setInactiveDate(inactiveDate);
 
 		logger.debug("Removing {} with Date [{}]", serviceComponent, serviceComponent.getInactiveDate().toLocalDate());
 
-		ArrayOfPkgComponent componentList = buildPkgComponentList(serviceComponent, servicePackage);
+		ArrayOfPkgComponent componentList = buildPkgComponentList(serviceComponent);
 		for (PkgComponent pkgComponent : componentList.getPkgComponent()) {
 			pkgComponent.setDiscReason(DISC_REASON);
 			pkgComponent.setDiscDate(DateUtils.getXMLCalendar(serviceComponent.getInactiveDate()));
@@ -156,9 +144,9 @@ public class ProvisionServiceComponentService extends ProvisionService {
 	 */
 
 	static ArrayOfPkgComponent buildPkgComponentList(
-			ServiceComponent serviceComponent, ServicePackage servicePackage) {
+			ServiceComponent serviceComponent) {
 		ArrayOfPkgComponent result = new ArrayOfPkgComponent();
-		result.getPkgComponent().add(ServiceComponent.toPkgComponent(serviceComponent, servicePackage));
+		result.getPkgComponent().add(KenanAdapter.toPkgComponent(serviceComponent));
 		return result;
 	}
 

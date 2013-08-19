@@ -8,24 +8,28 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tscp.mvna.account.kenan.KenanAccount;
 import com.tscp.mvna.account.kenan.KenanObject;
-import com.tscp.mvna.account.kenan.provision.service.ProvisionService;
-import com.tscp.mvna.account.kenan.provision.service.defaults.DefaultBillingPackage;
 import com.tscp.mvne.config.PROVISION;
-import com.tscp.util.DateUtils;
 
+/**
+ * Represents a ServicePackage in Kenan that is associated at the account level. This object does not need to be used
+ * directly as references to the instance id are contained in ServiceComponents
+ * 
+ * @author Jonathan
+ * 
+ */
 @XmlRootElement
 public class ServicePackage extends KenanObject {
 	private static final long serialVersionUID = 6237387974191464611L;
 	protected static final Logger logger = LoggerFactory.getLogger(ServicePackage.class);
+	protected KenanAccount account;
 	protected int instanceId;
 	protected int id = PROVISION.PACKAGE.ID;
-	protected int accountNo;
+	protected int serverId;
 	protected String name;
 	protected DateTime activeDate = new DateTime();
 	protected DateTime inactiveDate;
-
-	// protected List<ServiceComponent> componentList;
 
 	/* **************************************************
 	 * Getters and Setters
@@ -33,6 +37,24 @@ public class ServicePackage extends KenanObject {
 
 	public ServicePackage() {
 
+	}
+
+	public ServicePackage(KenanAccount account) {
+		this.account = account;
+	}
+
+	/* **************************************************
+	 * Fetch Methods
+	 */
+
+	@Override
+	public void load() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+	}
+
+	@Override
+	protected Object loadValue() {
+		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
 	}
 
 	/* **************************************************
@@ -59,14 +81,23 @@ public class ServicePackage extends KenanObject {
 		this.instanceId = instanceId;
 	}
 
-	@XmlTransient
-	public int getAccountNo() {
-		return accountNo;
+	public Integer getServerId() {
+		return serverId;
 	}
 
-	public void setAccountNo(
-			int accountNo) {
-		this.accountNo = accountNo;
+	public void setServerId(
+			int serverId) {
+		this.serverId = serverId;
+	}
+
+	@XmlTransient
+	public KenanAccount getAccount() {
+		return account;
+	}
+
+	public void setAccount(
+			KenanAccount account) {
+		this.account = account;
 	}
 
 	@XmlAttribute
@@ -97,74 +128,13 @@ public class ServicePackage extends KenanObject {
 		this.inactiveDate = inactiveDate;
 	}
 
-	// @XmlElement
-	// public List<ServiceComponent> getComponentList() {
-	// return componentList;
-	// }
-	//
-	// public void setComponentList(
-	// List<ServiceComponent> componentList) {
-	// this.componentList = componentList;
-	// }
-
 	/* **************************************************
 	 * Helper Methods
 	 */
 
-	// @XmlTransient
-	// public void addComponent(
-	// ServiceComponent serviceComponent) {
-	// if (componentList == null)
-	// componentList = new ArrayList<ServiceComponent>();
-	// componentList.add(serviceComponent);
-	// }
-
 	@XmlTransient
 	public boolean isEmpty() {
-		return instanceId == 0 || accountNo == 0 || id == 0;
-	}
-
-	/* **************************************************
-	 * Adaptor Methods for KenanGateway Objects
-	 */
-
-	public static ServicePackage fromBillingPackage(
-			com.telscape.billingserviceinterface.Package billingPackage) {
-
-		ServicePackage servicePackage = new ServicePackage();
-
-		servicePackage.setInstanceId(billingPackage.getPackageInstanceId());
-		servicePackage.setName(billingPackage.getPackageName());
-		servicePackage.setId(billingPackage.getPackageId());
-
-		// set account number
-		if (billingPackage.getAccountNo() != null && !billingPackage.getAccountNo().isEmpty())
-			servicePackage.setAccountNo(Integer.parseInt(billingPackage.getAccountNo()));
-
-		// set dates
-		if (billingPackage.getActiveDate() != null && !ProvisionService.isNullDate(billingPackage.getActiveDate()))
-			servicePackage.setActiveDate(new DateTime(billingPackage.getActiveDate().toGregorianCalendar()));
-		if (billingPackage.getDiscDate() != null && !ProvisionService.isNullDate(billingPackage.getDiscDate()))
-			servicePackage.setInactiveDate(new DateTime(billingPackage.getDiscDate().toGregorianCalendar()));
-
-		return servicePackage;
-	}
-
-	public static com.telscape.billingserviceinterface.Package toBillingPackage(
-			ServicePackage servicePackage) {
-		com.telscape.billingserviceinterface.Package result = new DefaultBillingPackage();
-		result.setAccountNo(Integer.toString(servicePackage.getAccountNo()));
-
-		if (servicePackage.isEmpty())
-			return result;
-
-		result.setPackageInstanceId(servicePackage.getInstanceId());
-		result.setPackageId(servicePackage.getId());
-		result.setPackageName(servicePackage.getName());
-		result.setActiveDate(DateUtils.getXMLCalendar(servicePackage.getActiveDate()));
-		result.setDiscDate(DateUtils.getXMLCalendar(servicePackage.getInactiveDate()));
-
-		return result;
+		return (account != null && account.getAccountNo() != 0) || instanceId == 0 || id == 0;
 	}
 
 	/* **************************************************
@@ -173,17 +143,7 @@ public class ServicePackage extends KenanObject {
 
 	@Override
 	public String toString() {
-		return "ServicePackage [id=" + id + ", instanceId=" + instanceId + ", accountNo=" + accountNo + ", name=" + name + "]";
-	}
-
-	@Override
-	public void load() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
-	}
-
-	@Override
-	protected Object loadValue() {
-		throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not have any values to load");
+		return "ServicePackage [id=" + id + ", instanceId=" + instanceId + ", name=" + name + "]";
 	}
 
 }
